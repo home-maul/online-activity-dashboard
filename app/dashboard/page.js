@@ -126,13 +126,11 @@ export default function DashboardOverview() {
                 ]}
               />
             </ChartCard>
-            <ChartCard title="Ads — Clicks & Impressions Over Time">
-              <LineChart
-                data={ads?.timeSeries ?? []}
-                lines={[
-                  { dataKey: "clicks", name: "Clicks" },
-                  { dataKey: "impressions", name: "Impressions" },
-                ]}
+            <ChartCard title="Traffic by Channel">
+              <BarChart
+                data={analytics?.channels ?? []}
+                bars={[{ dataKey: "sessions", name: "Sessions" }]}
+                xKey="channel"
               />
             </ChartCard>
           </>

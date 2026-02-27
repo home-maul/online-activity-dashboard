@@ -6,6 +6,7 @@ import ChartCard from "@/components/dashboard/chart-card";
 import DateRangeSelector from "@/components/dashboard/date-range-selector";
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/dashboard/loading-skeleton";
 import LineChart from "@/components/charts/line-chart";
+import BarChart from "@/components/charts/bar-chart";
 
 function getDateRange(days) {
   const end = new Date();
@@ -106,19 +107,78 @@ export default function AnalyticsPage() {
                 lines={[{ dataKey: "pageViews", name: "Page Views" }]}
               />
             </ChartCard>
-            <ChartCard title="All Metrics">
-              <LineChart
-                data={data?.timeSeries ?? []}
-                lines={[
-                  { dataKey: "sessions", name: "Sessions" },
-                  { dataKey: "users", name: "Users" },
-                  { dataKey: "pageViews", name: "Page Views" },
-                ]}
+            <ChartCard title="Sessions by Channel">
+              <BarChart
+                data={data?.channels ?? []}
+                bars={[{ dataKey: "sessions", name: "Sessions" }]}
+                xKey="channel"
               />
             </ChartCard>
           </>
         )}
       </div>
+
+      {/* Traffic Sources */}
+      {!loading && data?.channels?.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-500">Traffic by Channel</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">Channel</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Sessions</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Conversions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.channels.map((c) => (
+                  <tr key={c.channel} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="px-6 py-3 font-medium text-gray-900">{c.channel}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{c.sessions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{c.users.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{c.conversions}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Source / Medium */}
+      {!loading && data?.sources?.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-500">Top Sources / Medium</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">Source</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">Medium</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Sessions</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.sources.map((s) => (
+                  <tr key={`${s.source}-${s.medium}`} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="px-6 py-3 font-medium text-gray-900">{s.source}</td>
+                    <td className="px-6 py-3 text-gray-600">{s.medium}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{s.sessions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{s.users.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
