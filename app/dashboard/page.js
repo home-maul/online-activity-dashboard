@@ -7,6 +7,7 @@ import DateRangeSelector from "@/components/dashboard/date-range-selector";
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/dashboard/loading-skeleton";
 import LineChart from "@/components/charts/line-chart";
 import BarChart from "@/components/charts/bar-chart";
+import DonutChart from "@/components/charts/donut-chart";
 
 function getDateRange(days) {
   const end = new Date();
@@ -20,37 +21,41 @@ function getDateRange(days) {
 
 export default function DashboardOverview() {
   const [range, setRange] = useState("30");
+  const [customRange, setCustomRange] = useState(null);
   const [analytics, setAnalytics] = useState(null);
-  const [ads, setAds] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const { startDate, endDate } = getDateRange(range);
+
+    const { startDate, endDate } =
+      range === "custom" && customRange ? customRange : getDateRange(range);
     const params = `startDate=${startDate}&endDate=${endDate}`;
 
     try {
-      const analyticsRes = await fetch(`/api/analytics?${params}`);
-      if (!analyticsRes.ok) throw new Error("Failed to fetch analytics data");
-      setAnalytics(await analyticsRes.json());
-
-      // Ads is optional — may fail if developer token is not configured
-      try {
-        const adsRes = await fetch(`/api/ads?${params}`);
-        if (adsRes.ok) setAds(await adsRes.json());
-      } catch {}
+      const res = await fetch(`/api/analytics?${params}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Failed to fetch analytics data");
+      }
+      setAnalytics(await res.json());
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [range]);
+  }, [range, customRange]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleCustomRange = (cr) => {
+    setCustomRange(cr);
+    setRange("custom");
+  };
 
   if (error) {
     return (
@@ -59,7 +64,7 @@ export default function DashboardOverview() {
         <p className="text-red-500 text-sm mt-1">{error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
         >
           Retry
         </button>
@@ -67,48 +72,50 @@ export default function DashboardOverview() {
     );
   }
 
+  const t = analytics?.totals;
+  const c = t?.change;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Overview</h2>
-        <DateRangeSelector value={range} onChange={setRange} />
+        <DateRangeSelector
+          value={range}
+          onChange={setRange}
+          customRange={customRange}
+          onCustomRangeChange={handleCustomRange}
+        />
       </div>
 
-      {/* Analytics KPIs */}
-      <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-3">Google Analytics</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
-          ) : (
-            <>
-              <MetricCard title="Sessions" value={analytics?.totals?.sessions} />
-              <MetricCard title="Users" value={analytics?.totals?.users} />
-              <MetricCard title="Page Views" value={analytics?.totals?.pageViews} />
-              <MetricCard title="Bounce Rate" value={analytics?.totals?.bounceRate} format="percent" />
-            </>
-          )}
-        </div>
+      {/* Primary KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
+        ) : (
+          <>
+            <MetricCard title="Sessions" value={t?.sessions} change={c?.sessions} />
+            <MetricCard title="Users" value={t?.users} change={c?.users} />
+            <MetricCard title="Page Views" value={t?.pageViews} change={c?.pageViews} />
+            <MetricCard title="New Users" value={t?.newUsers} change={c?.newUsers} />
+          </>
+        )}
       </div>
 
-      {/* Ads KPIs */}
-      <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-3">Google Ads</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
-          ) : (
-            <>
-              <MetricCard title="Impressions" value={ads?.totals?.impressions} />
-              <MetricCard title="Clicks" value={ads?.totals?.clicks} />
-              <MetricCard title="Cost" value={ads?.totals?.cost} format="currency" />
-              <MetricCard title="Conversions" value={ads?.totals?.conversions} />
-            </>
-          )}
-        </div>
+      {/* Secondary KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
+        ) : (
+          <>
+            <MetricCard title="Engagement Rate" value={t?.engagementRate} format="percent" change={c?.engagementRate} />
+            <MetricCard title="Bounce Rate" value={t?.bounceRate} format="percent" change={c?.bounceRate} invertChange />
+            <MetricCard title="Avg Session Duration" value={t?.avgSessionDuration} format="duration" change={c?.avgSessionDuration} />
+            <MetricCard title="Conversions" value={t?.conversions} change={c?.conversions} />
+          </>
+        )}
       </div>
 
-      {/* Charts */}
+      {/* Charts row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {loading ? (
           <>
@@ -136,6 +143,79 @@ export default function DashboardOverview() {
           </>
         )}
       </div>
+
+      {/* Charts row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {loading ? (
+          <>
+            <ChartSkeleton />
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </>
+        ) : (
+          <>
+            <ChartCard title="Devices">
+              <DonutChart
+                data={analytics?.devices ?? []}
+                dataKey="sessions"
+                nameKey="device"
+              />
+            </ChartCard>
+            <ChartCard title="New vs Returning">
+              <DonutChart
+                data={analytics?.userTypes ?? []}
+                dataKey="users"
+                nameKey="type"
+              />
+            </ChartCard>
+            <ChartCard title="Top Countries">
+              <BarChart
+                data={(analytics?.countries ?? []).slice(0, 8)}
+                bars={[{ dataKey: "sessions", name: "Sessions" }]}
+                xKey="country"
+              />
+            </ChartCard>
+          </>
+        )}
+      </div>
+
+      {/* Top Pages */}
+      {!loading && analytics?.pages?.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-500">Top Pages</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">Page</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Views</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">Avg Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.pages.map((p) => (
+                  <tr key={p.path} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-3 font-mono text-xs text-gray-900">{p.path}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{p.views.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{p.users.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-600">{formatDuration(p.avgDuration)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
+}
+
+function formatDuration(seconds) {
+  if (!seconds) return "0s";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 }
