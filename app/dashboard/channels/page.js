@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MetricCard from "@/components/dashboard/metric-card";
 import ChartCard from "@/components/dashboard/chart-card";
 import LineChart from "@/components/charts/line-chart";
@@ -8,9 +8,69 @@ import DonutChart from "@/components/charts/donut-chart";
 import ChannelBar from "@/components/charts/channel-bar";
 import { getChannelsOverview } from "@/lib/mock-data";
 
+function usePipedriveOrMock() {
+  const [data, setData] = useState(null);
+  const [isMock, setIsMock] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/pipedrive?startDate=2025-01-01&endDate=2026-12-31")
+      .then((r) => r.json())
+      .then((pd) => {
+        if (pd.mock || pd.error) {
+          setData(getChannelsOverview());
+          setIsMock(true);
+        } else {
+          // Transform Pipedrive data into channel overview shape
+          const channels = pd.bySource.map((s, i) => ({
+            channel: s.source,
+            spend: 0, // Spend comes from ad platforms, not CRM
+            clicks: 0,
+            impressions: 0,
+            leads: s.deals,
+            qualified: s.won + s.open,
+            customers: s.won,
+            costPerLead: 0,
+            roas: null,
+            color: ["#070E1A", "#C6D2DF", "#8896A8", "#59A9FF"][i % 4],
+          }));
+          setData({
+            totals: {
+              spend: 0,
+              leads: pd.totals.deals,
+              costPerLead: 0,
+              pipeline: pd.totals.pipeline,
+              roas: 0,
+              qualifiedLeads: pd.totals.won + pd.totals.open,
+              customers: pd.totals.won,
+            },
+            channels,
+            timeSeries: pd.timeline.map((t) => ({
+              date: t.date,
+              totalSpend: 0,
+              totalLeads: t.added,
+            })),
+            channelMix: pd.bySource.slice(0, 6).map((s) => ({
+              name: s.source,
+              value: Math.round((s.deals / pd.totals.deals) * 100),
+              leads: s.deals,
+            })),
+          });
+          setIsMock(false);
+        }
+      })
+      .catch(() => {
+        setData(getChannelsOverview());
+        setIsMock(true);
+      });
+  }, []);
+
+  return { data, isMock };
+}
+
 export default function ChannelsPage() {
-  const [period] = useState("30d");
-  const data = getChannelsOverview();
+  const { data, isMock } = usePipedriveOrMock();
+
+  if (!data) return null;
   const t = data.totals;
 
   return (
@@ -20,9 +80,11 @@ export default function ChannelsPage() {
           <h2 className="text-lg font-semibold text-navy tracking-tight">Channels</h2>
           <p className="text-[12px] text-gray-muted mt-0.5">Cross-platform performance overview</p>
         </div>
-        <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
-          Mock data — connect APIs to go live
-        </span>
+        {isMock && (
+          <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
+            Mock data — connect Pipedrive to go live
+          </span>
+        )}
       </div>
 
       {/* Top-level KPIs */}
