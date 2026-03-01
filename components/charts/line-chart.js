@@ -11,7 +11,7 @@ import {
   Legend,
 } from "recharts";
 
-const COLORS = ["#070E1A", "#59A9FF", "#4A6FA5", "#C6D2DF"];
+const COLORS = ["#070E1A", "#C6D2DF", "#8896A8", "#59A9FF"];
 
 export default function LineChartComponent({ data, lines, xKey = "date" }) {
   return (
