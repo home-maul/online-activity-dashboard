@@ -14,7 +14,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-[260px] bg-navy flex flex-col min-h-screen">
-      <div className="px-6 py-7 border-b border-white/[0.06]">
+      <div className="px-6 py-7 border-b border-navy-light">
         <h1 className="text-[15px] font-semibold text-white tracking-tight">Marketing Dashboard</h1>
         <p className="text-[11px] text-gray-brand mt-1 tracking-wide">Homerunner</p>
       </div>
@@ -27,8 +27,8 @@ export default function Sidebar() {
               href={href}
               className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
                 active
-                  ? "bg-white/[0.08] text-white"
-                  : "text-gray-brand hover:bg-white/[0.04] hover:text-white/90"
+                  ? "bg-blue/15 text-blue"
+                  : "text-gray-brand hover:bg-navy-light hover:text-white"
               }`}
             >
               <Icon className="w-[18px] h-[18px] opacity-80" />
@@ -37,8 +37,8 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      <div className="px-5 py-4 border-t border-white/[0.06]">
-        <p className="text-[11px] text-white/20 tracking-wide">Powered by GA4</p>
+      <div className="px-5 py-4 border-t border-navy-light">
+        <p className="text-[11px] text-gray-muted tracking-wide">Powered by GA4</p>
       </div>
     </aside>
   );

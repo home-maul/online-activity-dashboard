@@ -37,7 +37,7 @@ export default function MetricCard({ title, value, format = "number", change, in
             <span className="text-[10px] text-gray-brand">vs prev</span>
           </>
         )}
-        {subtitle && <span className="text-[10px] text-gray-brand">{subtitle}</span>}
+        {!hasChange && subtitle && <span className="text-[10px] text-gray-brand">{subtitle}</span>}
       </div>
     </div>
   );

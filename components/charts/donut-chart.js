@@ -2,7 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
-const COLORS = ["#6EB3F7", "#3D6B99", "#B0BEC5", "#8E8E93", "#D1D1D6", "#A3C4E0", "#7A9BB5"];
+const COLORS = ["#59A9FF", "#000055", "#3D7BD9", "#C6D2DF", "#8896A8", "#A8D4FF", "#0f1a2e"];
 
 export default function DonutChart({ data, dataKey = "sessions", nameKey = "device" }) {
   return (
@@ -27,8 +27,8 @@ export default function DonutChart({ data, dataKey = "sessions", nameKey = "devi
           formatter={(value) => value.toLocaleString()}
           contentStyle={{
             borderRadius: "12px",
-            border: "1px solid #E5E5EA",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+            border: "1px solid #D8E1EB",
+            boxShadow: "0 4px 20px rgba(7,14,26,0.06)",
             fontSize: "12px",
             padding: "10px 14px",
           }}
@@ -36,7 +36,7 @@ export default function DonutChart({ data, dataKey = "sessions", nameKey = "devi
         <Legend
           iconType="circle"
           iconSize={6}
-          wrapperStyle={{ fontSize: "12px", color: "#8E8E93" }}
+          wrapperStyle={{ fontSize: "12px", color: "#8896A8" }}
         />
       </PieChart>
     </ResponsiveContainer>
