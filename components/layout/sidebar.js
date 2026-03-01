@@ -3,10 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview", icon: LayoutIcon },
-  { href: "/dashboard/analytics", label: "Analytics", icon: ChartIcon },
-  { href: "/dashboard/ads", label: "Ads", icon: MegaphoneIcon },
+const NAV_SECTIONS = [
+  {
+    label: "Site",
+    items: [
+      { href: "/dashboard", label: "Overview", icon: LayoutIcon },
+      { href: "/dashboard/analytics", label: "Analytics", icon: ChartIcon },
+      { href: "/dashboard/ads", label: "Ads", icon: MegaphoneIcon },
+    ],
+  },
+  {
+    label: "Marketing",
+    items: [
+      { href: "/dashboard/channels", label: "Channels", icon: ChannelsIcon },
+      { href: "/dashboard/campaigns", label: "Campaigns", icon: TargetIcon },
+      { href: "/dashboard/funnel", label: "Lead Funnel", icon: FunnelIcon },
+      { href: "/dashboard/content", label: "Content & SEO", icon: PenIcon },
+    ],
+  },
 ];
 
 export default function Sidebar() {
@@ -18,24 +32,31 @@ export default function Sidebar() {
         <h1 className="text-[15px] font-semibold text-white tracking-tight">Marketing Dashboard</h1>
         <p className="text-[11px] text-gray-brand mt-1 tracking-wide">Homerunner</p>
       </div>
-      <nav className="flex-1 p-3 space-y-0.5 mt-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
-                active
-                  ? "bg-blue/15 text-blue"
-                  : "text-gray-brand hover:bg-navy-light hover:text-white"
-              }`}
-            >
-              <Icon className="w-[18px] h-[18px] opacity-80" />
-              {label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 px-3 pt-4 space-y-5">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.label}>
+            <p className="px-3.5 mb-1.5 text-[10px] font-medium text-gray-muted uppercase tracking-widest">{section.label}</p>
+            <div className="space-y-0.5">
+              {section.items.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
+                      active
+                        ? "bg-blue/15 text-blue"
+                        : "text-gray-brand hover:bg-navy-light hover:text-white"
+                    }`}
+                  >
+                    <Icon className="w-[18px] h-[18px] opacity-80" />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
       <div className="px-5 py-4 border-t border-navy-light">
         <p className="text-[11px] text-gray-muted tracking-wide">Powered by GA4</p>
@@ -64,6 +85,39 @@ function MegaphoneIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
+    </svg>
+  );
+}
+
+function ChannelsIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+  );
+}
+
+function TargetIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+    </svg>
+  );
+}
+
+function FunnelIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+    </svg>
+  );
+}
+
+function PenIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
     </svg>
   );
 }
