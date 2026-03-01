@@ -2,7 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
-const COLORS = ["#59A9FF", "#000055", "#3D7BD9", "#C6D2DF", "#8896A8", "#A8D4FF", "#0f1a2e"];
+const COLORS = ["#070E1A", "#59A9FF", "#4A6FA5", "#C6D2DF", "#000055", "#8896A8", "#1a2540"];
 
 export default function DonutChart({ data, dataKey = "sessions", nameKey = "device" }) {
   return (

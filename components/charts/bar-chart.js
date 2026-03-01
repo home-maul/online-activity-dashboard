@@ -11,7 +11,7 @@ import {
   Legend,
 } from "recharts";
 
-const COLORS = ["#59A9FF", "#000055", "#3D7BD9", "#C6D2DF"];
+const COLORS = ["#070E1A", "#59A9FF", "#4A6FA5", "#C6D2DF"];
 
 export default function BarChartComponent({ data, bars, xKey = "name" }) {
   return (
