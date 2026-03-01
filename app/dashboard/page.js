@@ -59,12 +59,12 @@ export default function DashboardOverview() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-red-700 font-medium">Error loading data</p>
-        <p className="text-red-500 text-sm mt-1">{error}</p>
+      <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-8 text-center">
+        <p className="text-rose-600 font-medium text-[15px]">Error loading data</p>
+        <p className="text-rose-400 text-sm mt-1">{error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
+          className="mt-4 px-4 py-2 bg-navy/90 text-white text-sm rounded-xl hover:bg-navy transition-colors duration-200"
         >
           Retry
         </button>
@@ -75,10 +75,14 @@ export default function DashboardOverview() {
   const t = analytics?.totals;
   const c = t?.change;
 
+  const sessionsPerUser = t?.sessions && t?.users ? (t.sessions / t.users).toFixed(1) : null;
+  const pagesPerSession = t?.pageViews && t?.sessions ? (t.pageViews / t.sessions).toFixed(1) : null;
+  const conversionRate = t?.conversions && t?.sessions ? ((t.conversions / t.sessions) * 100).toFixed(2) : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Overview</h2>
+        <h2 className="text-lg font-semibold text-navy tracking-tight">Overview</h2>
         <DateRangeSelector
           value={range}
           onChange={setRange}
@@ -115,8 +119,21 @@ export default function DashboardOverview() {
         )}
       </div>
 
+      {/* Derived KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => <MetricCardSkeleton key={i} />)
+        ) : (
+          <>
+            <MetricCard title="Sessions / User" value={sessionsPerUser} format="decimal" subtitle="avg frequency" />
+            <MetricCard title="Pages / Session" value={pagesPerSession} format="decimal" subtitle="avg depth" />
+            <MetricCard title="Conversion Rate" value={conversionRate} format="percent" subtitle="sessions to conversions" />
+          </>
+        )}
+      </div>
+
       {/* Charts row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {loading ? (
           <>
             <ChartSkeleton />
@@ -145,7 +162,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* Charts row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {loading ? (
           <>
             <ChartSkeleton />
@@ -181,27 +198,58 @@ export default function DashboardOverview() {
 
       {/* Top Pages */}
       {!loading && analytics?.pages?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-500">Top Pages</h3>
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Pages</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-6 py-3 font-medium text-gray-500">Page</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Views</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Avg Duration</th>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Page</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Views</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Duration</th>
                 </tr>
               </thead>
               <tbody>
                 {analytics.pages.map((p) => (
-                  <tr key={p.path} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-3 font-mono text-xs text-gray-900">{p.path}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{p.views.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{p.users.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{formatDuration(p.avgDuration)}</td>
+                  <tr key={p.path} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-mono text-xs text-navy/80">{p.path}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{p.views.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{p.users.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{formatDuration(p.avgDuration)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Top Sources */}
+      {!loading && analytics?.sources?.length > 0 && (
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Sources</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Source</th>
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Medium</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.sources.slice(0, 10).map((s, i) => (
+                  <tr key={i} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 text-navy/80">{s.source}</td>
+                    <td className="px-6 py-3 text-gray-muted">{s.medium}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{s.sessions?.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{s.users?.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

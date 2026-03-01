@@ -64,12 +64,12 @@ export default function AnalyticsPage() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-red-700 font-medium">Error loading analytics</p>
-        <p className="text-red-500 text-sm mt-1">{error}</p>
+      <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-8 text-center">
+        <p className="text-rose-600 font-medium text-[15px]">Error loading analytics</p>
+        <p className="text-rose-400 text-sm mt-1">{error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
+          className="mt-4 px-4 py-2 bg-navy/90 text-white text-sm rounded-xl hover:bg-navy transition-colors duration-200"
         >
           Retry
         </button>
@@ -83,7 +83,7 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Google Analytics</h2>
+        <h2 className="text-lg font-semibold text-navy tracking-tight">Google Analytics</h2>
         <DateRangeSelector
           value={range}
           onChange={setRange}
@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Time series charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {loading ? (
           <>
             <ChartSkeleton />
@@ -136,7 +136,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Breakdown charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {loading ? (
           <>
             <ChartSkeleton />
@@ -172,27 +172,27 @@ export default function AnalyticsPage() {
 
       {/* Traffic by Channel table */}
       {!loading && data?.channels?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-500">Traffic by Channel</h3>
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Traffic by Channel</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-6 py-3 font-medium text-gray-500">Channel</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Sessions</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Conversions</th>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Channel</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Conversions</th>
                 </tr>
               </thead>
               <tbody>
                 {data.channels.map((c) => (
-                  <tr key={c.channel} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-3 font-medium text-gray-900">{c.channel}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.sessions.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.users.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.conversions}</td>
+                  <tr key={c.channel} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-medium text-navy/80">{c.channel}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.sessions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.users.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.conversions}</td>
                   </tr>
                 ))}
               </tbody>
@@ -203,27 +203,27 @@ export default function AnalyticsPage() {
 
       {/* Source / Medium table */}
       {!loading && data?.sources?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-500">Top Sources / Medium</h3>
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Sources / Medium</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-6 py-3 font-medium text-gray-500">Source</th>
-                  <th className="text-left px-6 py-3 font-medium text-gray-500">Medium</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Sessions</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Source</th>
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Medium</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
                 </tr>
               </thead>
               <tbody>
                 {data.sources.map((s) => (
-                  <tr key={`${s.source}-${s.medium}`} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-3 font-medium text-gray-900">{s.source}</td>
-                    <td className="px-6 py-3 text-gray-600">{s.medium}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{s.sessions.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{s.users.toLocaleString()}</td>
+                  <tr key={`${s.source}-${s.medium}`} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-medium text-navy/80">{s.source}</td>
+                    <td className="px-6 py-3 text-gray-muted">{s.medium}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{s.sessions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{s.users.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -234,27 +234,27 @@ export default function AnalyticsPage() {
 
       {/* Top Pages table */}
       {!loading && data?.pages?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-500">Top Pages</h3>
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Pages</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-6 py-3 font-medium text-gray-500">Page</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Views</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Avg Duration</th>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Page</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Views</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Duration</th>
                 </tr>
               </thead>
               <tbody>
                 {data.pages.map((p) => (
-                  <tr key={p.path} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-3 font-mono text-xs text-gray-900">{p.path}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{p.views.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{p.users.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{formatDuration(p.avgDuration)}</td>
+                  <tr key={p.path} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-mono text-xs text-navy/80">{p.path}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{p.views.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{p.users.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{formatDuration(p.avgDuration)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -265,25 +265,25 @@ export default function AnalyticsPage() {
 
       {/* Countries table */}
       {!loading && data?.countries?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-500">Top Countries</h3>
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Countries</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-6 py-3 font-medium text-gray-500">Country</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Sessions</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Users</th>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Country</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
                 </tr>
               </thead>
               <tbody>
                 {data.countries.map((c) => (
-                  <tr key={c.country} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-3 font-medium text-gray-900">{c.country}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.sessions.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.users.toLocaleString()}</td>
+                  <tr key={c.country} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-medium text-navy/80">{c.country}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.sessions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.users.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

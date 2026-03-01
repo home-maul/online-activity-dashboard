@@ -31,15 +31,15 @@ export default function DateRangeSelector({ value, onChange, customRange, onCust
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       {RANGES.map((range) => (
         <button
           key={range.value}
           onClick={() => handleClick(range.value)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 ${
             (range.value === "custom" && value === "custom") || (range.value !== "custom" && value === range.value)
-              ? "bg-gray-900 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-navy/90 text-white shadow-sm"
+              : "text-gray-muted hover:bg-black/[0.03] hover:text-navy"
           }`}
         >
           {range.label}
@@ -51,18 +51,18 @@ export default function DateRangeSelector({ value, onChange, customRange, onCust
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="px-2 py-1.5 rounded-lg border border-gray-200 text-sm bg-white text-gray-700"
+            className="px-2.5 py-1.5 rounded-lg border border-border text-[12px] bg-surface text-navy"
           />
-          <span className="text-gray-400 text-sm">to</span>
+          <span className="text-gray-brand text-[12px]">to</span>
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="px-2 py-1.5 rounded-lg border border-gray-200 text-sm bg-white text-gray-700"
+            className="px-2.5 py-1.5 rounded-lg border border-border text-[12px] bg-surface text-navy"
           />
           <button
             onClick={applyCustom}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-[12px] font-medium bg-blue text-white hover:bg-blue/85 transition-colors duration-200"
           >
             Apply
           </button>

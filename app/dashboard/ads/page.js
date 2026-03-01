@@ -46,12 +46,12 @@ export default function AdsPage() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-red-700 font-medium">Error loading ads data</p>
-        <p className="text-red-500 text-sm mt-1">{error}</p>
+      <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-8 text-center">
+        <p className="text-rose-600 font-medium text-[15px]">Error loading ads data</p>
+        <p className="text-rose-400 text-sm mt-1">{error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-navy/90 text-white text-sm rounded-xl hover:bg-navy transition-colors duration-200"
         >
           Retry
         </button>
@@ -59,10 +59,14 @@ export default function AdsPage() {
     );
   }
 
+  const t = data?.totals;
+  const costPerClick = t?.clicks ? (t.cost / t.clicks).toFixed(2) : null;
+  const costPerConversion = t?.conversions ? (t.cost / t.conversions).toFixed(2) : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Google Ads</h2>
+        <h2 className="text-lg font-semibold text-navy tracking-tight">Google Ads</h2>
         <DateRangeSelector value={range} onChange={setRange} />
       </div>
 
@@ -72,17 +76,29 @@ export default function AdsPage() {
           Array.from({ length: 5 }).map((_, i) => <MetricCardSkeleton key={i} />)
         ) : (
           <>
-            <MetricCard title="Impressions" value={data?.totals?.impressions} />
-            <MetricCard title="Clicks" value={data?.totals?.clicks} />
-            <MetricCard title="CTR" value={data?.totals?.ctr} format="percent" />
-            <MetricCard title="Cost" value={data?.totals?.cost} format="currency" />
-            <MetricCard title="Conversions" value={data?.totals?.conversions} />
+            <MetricCard title="Impressions" value={t?.impressions} />
+            <MetricCard title="Clicks" value={t?.clicks} />
+            <MetricCard title="CTR" value={t?.ctr} format="percent" />
+            <MetricCard title="Cost" value={t?.cost} format="currency" />
+            <MetricCard title="Conversions" value={t?.conversions} />
+          </>
+        )}
+      </div>
+
+      {/* Derived KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {loading ? (
+          Array.from({ length: 2 }).map((_, i) => <MetricCardSkeleton key={i} />)
+        ) : (
+          <>
+            <MetricCard title="Cost / Click" value={costPerClick} format="currency" subtitle="avg CPC" />
+            <MetricCard title="Cost / Conversion" value={costPerConversion} format="currency" subtitle="avg CPA" />
           </>
         )}
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {loading ? (
           <>
             <ChartSkeleton />
@@ -111,31 +127,31 @@ export default function AdsPage() {
 
       {/* Campaign table */}
       {!loading && data?.campaigns?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-500">Campaigns</h3>
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Campaigns</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-6 py-3 font-medium text-gray-500">Campaign</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Impressions</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Clicks</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">CTR</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Cost</th>
-                  <th className="text-right px-6 py-3 font-medium text-gray-500">Conversions</th>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Campaign</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Impressions</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Clicks</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">CTR</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Cost</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Conversions</th>
                 </tr>
               </thead>
               <tbody>
                 {data.campaigns.map((c) => (
-                  <tr key={c.name} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="px-6 py-3 font-medium text-gray-900">{c.name}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.impressions.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.clicks.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.ctr}%</td>
-                    <td className="px-6 py-3 text-right text-gray-600">${c.cost.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-600">{c.conversions}</td>
+                  <tr key={c.name} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-medium text-navy/80">{c.name}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.impressions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.clicks.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.ctr}%</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">${c.cost.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.conversions}</td>
                   </tr>
                 ))}
               </tbody>
