@@ -16,6 +16,14 @@
   --color-gray-muted: #8896A8;
   --color-border: #D8E1EB;
   --color-surface: #FFFFFF;
+  --color-sidebar: #070E1A;
+  --color-sidebar-border: #0f1a2e;
+  --color-sidebar-text: #FFFFFF;
+  --color-sidebar-text-secondary: #C6D2DF;
+  --color-sidebar-text-muted: #8896A8;
+  --color-sidebar-hover: #0f1a2e;
+  --color-sidebar-active-bg: rgba(43, 124, 233, 0.15);
+  --color-sidebar-active-text: #59A9FF;
 }
 
 body {
@@ -24,4 +32,37 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
+}
+
+:root {
+  --hover-glow: rgba(43, 124, 233, 0.08);
+}
+
+/* ─── Prism (Stripe/Intercom-inspired) Theme ─── */
+[data-theme="prism"] {
+  --hover-glow: rgba(108, 92, 231, 0.08);
+
+  --color-navy: #1A1D26;
+  --color-navy-light: #F5F5F3;
+  --color-navy-muted: #EEEEE8;
+  --color-blue: #6C5CE7;
+  --color-blue-deep: #F0EEFB;
+  --color-blue-slate: #7C7C8A;
+  --color-blue-mid: #6C5CE7;
+  --color-blue-royal: #5B21B6;
+  --color-blue-soft: #A78BFA;
+  --color-blue-sky: #F8F8F6;
+  --color-blue-ice: #F0EEFB;
+  --color-gray-brand: #6B7280;
+  --color-gray-muted: #9CA3AF;
+  --color-border: #E5E4DF;
+  --color-surface: #FFFFFF;
+  --color-sidebar: #FAFAF8;
+  --color-sidebar-border: #E5E4DF;
+  --color-sidebar-text: #1A1D26;
+  --color-sidebar-text-secondary: #6B7280;
+  --color-sidebar-text-muted: #9CA3AF;
+  --color-sidebar-hover: #F0EEFB;
+  --color-sidebar-active-bg: rgba(108, 92, 231, 0.12);
+  --color-sidebar-active-text: #6C5CE7;
 }

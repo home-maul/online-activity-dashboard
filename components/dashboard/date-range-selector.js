@@ -38,8 +38,8 @@ export default function DateRangeSelector({ value, onChange, customRange, onCust
           onClick={() => handleClick(range.value)}
           className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 ${
             (range.value === "custom" && value === "custom") || (range.value !== "custom" && value === range.value)
-              ? "bg-navy/90 text-white shadow-sm"
-              : "text-gray-muted hover:bg-black/[0.03] hover:text-navy"
+              ? "bg-blue-mid text-white shadow-sm"
+              : "text-gray-muted hover:bg-blue-ice hover:text-navy"
           }`}
         >
           {range.label}

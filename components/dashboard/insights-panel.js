@@ -1,12 +1,21 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useTheme } from "@/components/providers/theme-provider";
 
 const TYPE_STYLES = {
-  opportunity: { bg: "bg-emerald-50", border: "border-emerald-200", icon: "text-emerald-600", label: "Opportunity" },
-  warning: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", label: "Warning" },
-  trend: { bg: "bg-blue-ice", border: "border-blue/20", icon: "text-blue-mid", label: "Trend" },
-  action: { bg: "bg-violet-50", border: "border-violet-200", icon: "text-violet-600", label: "Action" },
+  corporate: {
+    opportunity: { bg: "bg-emerald-50", border: "border-emerald-200", icon: "text-emerald-600", label: "Opportunity" },
+    warning: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", label: "Warning" },
+    trend: { bg: "bg-blue-ice", border: "border-blue/20", icon: "text-blue-mid", label: "Trend" },
+    action: { bg: "bg-violet-50", border: "border-violet-200", icon: "text-violet-600", label: "Action" },
+  },
+  prism: {
+    opportunity: { bg: "bg-emerald-50", border: "border-emerald-200", icon: "text-emerald-600", label: "Opportunity" },
+    warning: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", label: "Warning" },
+    trend: { bg: "bg-violet-50", border: "border-violet-200", icon: "text-violet-600", label: "Trend" },
+    action: { bg: "bg-violet-50", border: "border-violet-200", icon: "text-violet-600", label: "Action" },
+  },
 };
 
 const PRIORITY_DOT = {
@@ -39,6 +48,7 @@ const TYPE_ICONS = {
 };
 
 export default function InsightsPanel({ startDate, endDate }) {
+  const { theme } = useTheme();
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -66,7 +76,7 @@ export default function InsightsPanel({ startDate, endDate }) {
 
   if (!insights && !loading && !error) {
     return (
-      <div className="bg-surface rounded-2xl border border-border p-8 text-center hover:shadow-[0_4px_24px_rgba(43,124,233,0.08)] hover:border-blue/20 transition-all duration-300">
+      <div className="bg-surface rounded-2xl border border-border p-8 text-center hover:shadow-[0_4px_24px_var(--hover-glow,rgba(43,124,233,0.08))] hover:border-blue/20 transition-all duration-300">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-ice mb-4">
           <svg className="w-6 h-6 text-blue-mid" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -76,7 +86,7 @@ export default function InsightsPanel({ startDate, endDate }) {
         <p className="text-[12px] text-gray-muted mb-4">Analyze your marketing data and get actionable recommendations</p>
         <button
           onClick={fetchInsights}
-          className="px-5 py-2 bg-navy text-white text-[12px] font-medium rounded-xl hover:bg-navy-light transition-colors duration-200"
+          className="px-5 py-2 bg-blue-mid text-white text-[12px] font-medium rounded-xl hover:bg-blue transition-colors duration-200"
         >
           Generate Insights
         </button>
@@ -136,7 +146,8 @@ export default function InsightsPanel({ startDate, endDate }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {sorted.map((insight, i) => {
-          const style = TYPE_STYLES[insight.type] || TYPE_STYLES.trend;
+          const themeStyles = TYPE_STYLES[theme] || TYPE_STYLES.corporate;
+          const style = themeStyles[insight.type] || themeStyles.trend;
           return (
             <div key={i} className={`${style.bg} border ${style.border} rounded-xl p-4 transition-all duration-200 hover:shadow-sm`}>
               <div className="flex items-start justify-between mb-2">

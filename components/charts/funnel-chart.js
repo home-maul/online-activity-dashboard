@@ -1,22 +1,22 @@
 "use client";
 
-const STAGE_COLORS = [
-  "#070E1A",
-  "#1E40AF",
-  "#2B7CE9",
-  "#4A6FA5",
-  "#59A9FF",
-  "#93C5FD",
-];
+import { useTheme } from "@/components/providers/theme-provider";
+
+const STAGE_COLORS = {
+  corporate: ["#070E1A", "#1E40AF", "#2B7CE9", "#4A6FA5", "#59A9FF", "#93C5FD"],
+  prism: ["#5B21B6", "#6C5CE7", "#8B5CF6", "#A78BFA", "#C4B5FD", "#DDD6FE"],
+};
 
 export default function FunnelChart({ stages, rates }) {
+  const { theme } = useTheme();
+  const colors = STAGE_COLORS[theme] || STAGE_COLORS.corporate;
   const maxValue = stages[0]?.value || 1;
 
   return (
     <div className="space-y-2.5">
       {stages.map((stage, i) => {
         const width = Math.max((stage.value / maxValue) * 100, 10);
-        const color = STAGE_COLORS[i % STAGE_COLORS.length];
+        const color = colors[i % colors.length];
         const rate = rates?.[i];
         return (
           <div key={stage.stage} className="flex items-center gap-4">

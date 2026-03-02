@@ -6,7 +6,7 @@ export default function Header() {
   const { data: session } = useSession();
 
   return (
-    <header className="h-14 border-b border-border bg-white/60 backdrop-blur-xl flex items-center justify-between px-6">
+    <header className="h-14 border-b border-border bg-surface/60 backdrop-blur-xl flex items-center justify-between px-6">
       <div />
       <div className="flex items-center gap-4">
         {session?.user && (

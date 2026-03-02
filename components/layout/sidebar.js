@@ -37,8 +37,8 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[260px] bg-navy flex flex-col min-h-screen">
-      <div className="px-6 py-6 border-b border-navy-light flex items-center gap-3">
+    <aside className="w-[260px] bg-sidebar flex flex-col min-h-screen">
+      <div className="px-6 py-6 border-b border-sidebar-border flex items-center gap-3">
         <Image
           src="/logo.png"
           alt="Homerunner"
@@ -47,14 +47,14 @@ export default function Sidebar() {
           className="rounded-lg"
         />
         <div>
-          <h1 className="text-[15px] font-semibold text-white tracking-tight">Marketing</h1>
-          <p className="text-[11px] text-gray-brand mt-0.5 tracking-wide">Homerunner</p>
+          <h1 className="text-[15px] font-semibold text-sidebar-text tracking-tight">Marketing</h1>
+          <p className="text-[11px] text-sidebar-text-secondary mt-0.5 tracking-wide">Homerunner</p>
         </div>
       </div>
       <nav className="flex-1 px-3 pt-4 space-y-5">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="px-3.5 mb-1.5 text-[10px] font-medium text-gray-muted uppercase tracking-widest">{section.label}</p>
+            <p className="px-3.5 mb-1.5 text-[10px] font-medium text-sidebar-text-muted uppercase tracking-widest">{section.label}</p>
             <div className="space-y-0.5">
               {section.items.map(({ href, label, icon: Icon }) => {
                 const active = pathname === href;
@@ -64,8 +64,8 @@ export default function Sidebar() {
                     href={href}
                     className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
                       active
-                        ? "bg-blue/15 text-blue"
-                        : "text-gray-brand hover:bg-navy-light hover:text-white"
+                        ? "bg-sidebar-active-bg text-sidebar-active-text"
+                        : "text-sidebar-text-secondary hover:bg-sidebar-hover hover:text-sidebar-text"
                     }`}
                   >
                     <Icon className="w-[18px] h-[18px] opacity-80" />
@@ -77,8 +77,8 @@ export default function Sidebar() {
           </div>
         ))}
       </nav>
-      <div className="px-5 py-4 border-t border-navy-light">
-        <p className="text-[11px] text-gray-muted tracking-wide">Powered by GA4</p>
+      <div className="px-5 py-4 border-t border-sidebar-border">
+        <p className="text-[11px] text-sidebar-text-muted tracking-wide">Powered by GA4</p>
       </div>
     </aside>
   );
