@@ -8,6 +8,20 @@ export async function GET(request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (!process.env.GOOGLE_ADS_DEVELOPER_TOKEN) {
+    return Response.json(
+      { error: "Not configured", detail: "GOOGLE_ADS_DEVELOPER_TOKEN is missing" },
+      { status: 503 }
+    );
+  }
+
+  if (!process.env.GOOGLE_ADS_CUSTOMER_ID) {
+    return Response.json(
+      { error: "Not configured", detail: "GOOGLE_ADS_CUSTOMER_ID is missing" },
+      { status: 503 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const startDate = searchParams.get("startDate") || "2024-01-01";
   const endDate = searchParams.get("endDate") || new Date().toISOString().split("T")[0];

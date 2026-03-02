@@ -6,7 +6,8 @@ import ChartCard from "@/components/dashboard/chart-card";
 import DateRangeSelector from "@/components/dashboard/date-range-selector";
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/dashboard/loading-skeleton";
 import LineChart from "@/components/charts/line-chart";
-import BarChart from "@/components/charts/bar-chart";
+import MockBanner from "@/components/dashboard/mock-banner";
+import { getAdsData } from "@/lib/mock-data";
 
 function getDateRange(days) {
   const end = new Date();
@@ -21,23 +22,35 @@ function getDateRange(days) {
 export default function AdsPage() {
   const [range, setRange] = useState("30");
   const [data, setData] = useState(null);
+  const [isMock, setIsMock] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const mockData = getAdsData();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    setError(null);
     const { startDate, endDate } = getDateRange(range);
 
     try {
       const res = await fetch(`/api/ads?startDate=${startDate}&endDate=${endDate}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || "Failed to fetch ads data");
+        console.warn("[Google Ads]", body.detail || body.error || res.status);
+        throw new Error(body.detail || "Google Ads not configured");
       }
-      setData(await res.json());
+      const json = await res.json();
+      if (json.totals) {
+        setData(json);
+        setIsMock(false);
+      } else {
+        console.warn("[Google Ads] No data returned");
+        setData(null);
+        setIsMock(true);
+      }
     } catch (err) {
-      setError(err.message);
+      console.warn("[Google Ads] Falling back to mock:", err.message);
+      setData(null);
+      setIsMock(true);
     } finally {
       setLoading(false);
     }
@@ -47,27 +60,14 @@ export default function AdsPage() {
     fetchData();
   }, [fetchData]);
 
-  if (error) {
-    return (
-      <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-8 text-center">
-        <p className="text-rose-600 font-medium text-[15px]">Error loading ads data</p>
-        <p className="text-rose-400 text-sm mt-1">{error}</p>
-        <button
-          onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-navy/90 text-white text-sm rounded-xl hover:bg-navy transition-colors duration-200"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
-  const t = data?.totals;
+  const d = isMock ? mockData : data;
+  const t = d?.totals;
   const costPerClick = t?.clicks ? (t.cost / t.clicks).toFixed(2) : null;
   const costPerConversion = t?.conversions ? (t.cost / t.conversions).toFixed(2) : null;
 
   return (
     <div className="space-y-6">
+      {isMock && <MockBanner />}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-navy tracking-tight">Google Ads</h2>
         <DateRangeSelector value={range} onChange={setRange} />
@@ -111,7 +111,7 @@ export default function AdsPage() {
           <>
             <ChartCard title="Clicks & Impressions Over Time">
               <LineChart
-                data={data?.timeSeries ?? []}
+                data={d?.timeSeries ?? []}
                 lines={[
                   { dataKey: "clicks", name: "Clicks" },
                   { dataKey: "impressions", name: "Impressions" },
@@ -120,7 +120,7 @@ export default function AdsPage() {
             </ChartCard>
             <ChartCard title="Daily Ad Spend">
               <LineChart
-                data={data?.timeSeries ?? []}
+                data={d?.timeSeries ?? []}
                 lines={[{ dataKey: "cost", name: "Cost ($)" }]}
               />
             </ChartCard>
@@ -129,7 +129,7 @@ export default function AdsPage() {
       </div>
 
       {/* Campaign table */}
-      {!loading && data?.campaigns?.length > 0 && (
+      {!loading && d?.campaigns?.length > 0 && (
         <div className="bg-surface rounded-2xl border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border">
             <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Campaigns</h3>
@@ -147,7 +147,7 @@ export default function AdsPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.campaigns.map((c) => (
+                {d.campaigns.map((c) => (
                   <tr key={c.name} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
                     <td className="px-6 py-3 font-medium text-navy/80">{c.name}</td>
                     <td className="px-6 py-3 text-right text-gray-muted">{c.impressions.toLocaleString()}</td>
