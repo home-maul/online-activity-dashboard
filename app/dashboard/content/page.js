@@ -42,12 +42,20 @@ export default function ContentPage() {
       const res = await fetch(`/api/search-console?startDate=${startDate}&endDate=${endDate}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
+        console.warn("[Search Console]", body.detail || body.error || res.status);
         throw new Error(body.detail || "Search Console not configured");
       }
-      setGsc(await res.json());
-      setIsMock(false);
-    } catch {
-      // Fall back to mock data
+      const json = await res.json();
+      if (json.totals) {
+        setGsc(json);
+        setIsMock(false);
+      } else {
+        console.warn("[Search Console] No data returned");
+        setGsc(null);
+        setIsMock(true);
+      }
+    } catch (err) {
+      console.warn("[Search Console] Falling back to mock:", err.message);
       setGsc(null);
       setIsMock(true);
     } finally {
