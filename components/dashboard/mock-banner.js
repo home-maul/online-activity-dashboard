@@ -1,9 +1,9 @@
 "use client";
 
-export default function MockBanner() {
+export default function MockBanner({ message }) {
   return (
     <div className="w-full bg-blue text-white text-center py-1.5 text-[11px] font-medium tracking-wide">
-      Displaying mock data — connect APIs to see live results
+      {message || "Not connected — connect the API to see live data"}
     </div>
   );
 }

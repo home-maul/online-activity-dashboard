@@ -23,10 +23,10 @@ function getDateRange(days) {
  * All pull data from GA4 with the same structure:
  *   { paid, organic, landingPages, sourceBreakdown? }
  */
-export default function PlatformPage({ name, subtitle, apiPath, mockData }) {
+export default function PlatformPage({ name, subtitle, apiPath }) {
   const [range, setRange] = useState("30");
   const [data, setData] = useState(null);
-  const [isMock, setIsMock] = useState(true);
+  const [noData, setNoData] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -40,13 +40,13 @@ export default function PlatformPage({ name, subtitle, apiPath, mockData }) {
 
       if (json.paid || json.organic) {
         setData(json);
-        setIsMock(false);
+        setNoData(false);
       } else {
-        setIsMock(true);
+        setNoData(true);
       }
     } catch (err) {
-      console.warn(`[${name}] Falling back to mock:`, err.message);
-      setIsMock(true);
+      console.warn(`[${name}]`, err.message);
+      setNoData(true);
     } finally {
       setLoading(false);
     }
@@ -56,15 +56,14 @@ export default function PlatformPage({ name, subtitle, apiPath, mockData }) {
     fetchData();
   }, [fetchData]);
 
-  const d = isMock ? mockData : data;
-  const paid = d?.paid;
-  const organic = d?.organic;
-  const pages = d?.landingPages || [];
-  const sources = d?.sourceBreakdown || [];
+  const paid = data?.paid;
+  const organic = data?.organic;
+  const pages = data?.landingPages || [];
+  const sources = data?.sourceBreakdown || [];
 
   return (
     <div className="space-y-6">
-      {isMock && <MockBanner />}
+      {noData && !loading && <MockBanner message={`${name} — not connected`} />}
 
       <div className="flex items-center justify-between">
         <div>
@@ -73,6 +72,13 @@ export default function PlatformPage({ name, subtitle, apiPath, mockData }) {
         </div>
         <DateRangeSelector value={range} onChange={setRange} />
       </div>
+
+      {/* If no data and not loading, show nothing below the banner */}
+      {noData && !loading && (
+        <div className="rounded-2xl border border-border bg-blue-sky/30 p-12 text-center">
+          <p className="text-[13px] text-gray-muted">No {name} data available for this period</p>
+        </div>
+      )}
 
       {/* ── Paid Section ── */}
       {paid && (
@@ -217,7 +223,7 @@ export default function PlatformPage({ name, subtitle, apiPath, mockData }) {
         </div>
       )}
 
-      {/* ── Source Breakdown (Meta only: Facebook vs Instagram) ── */}
+      {/* ── Source Breakdown ── */}
       {!loading && sources.length > 0 && (
         <div className="bg-surface rounded-2xl border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border">
@@ -277,6 +283,19 @@ export default function PlatformPage({ name, subtitle, apiPath, mockData }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Loading state */}
+      {loading && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <ChartSkeleton />
+            <ChartSkeleton />
           </div>
         </div>
       )}
