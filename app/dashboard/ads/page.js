@@ -31,7 +31,10 @@ export default function AdsPage() {
 
     try {
       const res = await fetch(`/api/ads?startDate=${startDate}&endDate=${endDate}`);
-      if (!res.ok) throw new Error("Failed to fetch ads data");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Failed to fetch ads data");
+      }
       setData(await res.json());
     } catch (err) {
       setError(err.message);

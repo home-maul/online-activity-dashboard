@@ -18,7 +18,7 @@ export async function GET(request) {
   } catch (error) {
     console.error("Ads API error:", error);
     return Response.json(
-      { error: "Failed to fetch ads data" },
+      { error: "Failed to fetch ads data", detail: error.message },
       { status: 500 }
     );
   }
