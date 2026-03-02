@@ -10,7 +10,7 @@ export async function GET(request) {
 
   if (!process.env.GA4_PROPERTY_ID) {
     return Response.json(
-      { error: "Not configured", detail: "GA4_PROPERTY_ID is missing" },
+      { error: "Not configured" },
       { status: 503 }
     );
   }
@@ -25,7 +25,7 @@ export async function GET(request) {
   } catch (error) {
     console.error("Reddit API error:", error);
     return Response.json(
-      { error: "Failed to fetch Reddit data", detail: error.message },
+      { error: "Failed to fetch Reddit data" },
       { status: 500 }
     );
   }

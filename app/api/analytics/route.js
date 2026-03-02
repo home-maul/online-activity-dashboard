@@ -18,7 +18,7 @@ export async function GET(request) {
   } catch (error) {
     console.error("Analytics API error:", error);
     return Response.json(
-      { error: "Failed to fetch analytics data", detail: error?.message ?? String(error) },
+      { error: "Failed to fetch analytics data" },
       { status: 500 }
     );
   }

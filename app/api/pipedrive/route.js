@@ -4,7 +4,7 @@ import { fetchPipedriveData } from "@/lib/connectors/pipedrive";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session?.accessToken) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -15,17 +15,13 @@ export async function GET(request) {
   try {
     const data = await fetchPipedriveData({ startDate, endDate });
 
-    // If Pipedrive is not configured, return mock flag so frontend knows
     if (data.mock) {
-      return Response.json({ mock: true, error: data.error });
+      return Response.json({ mock: true });
     }
 
     return Response.json(data);
   } catch (err) {
     console.error("Pipedrive API error:", err);
-    return Response.json(
-      { error: "Failed to fetch Pipedrive data", detail: err.message },
-      { status: 500 }
-    );
+    return Response.json({ error: "Failed to fetch Pipedrive data" }, { status: 500 });
   }
 }

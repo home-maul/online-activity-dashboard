@@ -4,7 +4,7 @@ import { fetchSearchConsole } from "@/lib/connectors/search-console";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session?.accessToken) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -21,9 +21,6 @@ export async function GET(request) {
     return Response.json(data);
   } catch (err) {
     console.error("Search Console API error:", err);
-    return Response.json(
-      { error: "Failed to fetch Search Console data", detail: err.message },
-      { status: 500 }
-    );
+    return Response.json({ error: "Failed to fetch Search Console data" }, { status: 500 });
   }
 }

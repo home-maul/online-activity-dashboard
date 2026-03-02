@@ -8,6 +8,7 @@ import { MetricCardSkeleton, ChartSkeleton } from "@/components/dashboard/loadin
 import LineChart from "@/components/charts/line-chart";
 import BarChart from "@/components/charts/bar-chart";
 import DonutChart from "@/components/charts/donut-chart";
+import InsightsPanel from "@/components/dashboard/insights-panel";
 
 function getDateRange(days) {
   const end = new Date();
@@ -195,6 +196,14 @@ export default function DashboardOverview() {
           </>
         )}
       </div>
+
+      {/* AI Insights */}
+      {!loading && analytics && (
+        <InsightsPanel
+          startDate={range === "custom" && customRange ? customRange.startDate : getDateRange(range).startDate}
+          endDate={range === "custom" && customRange ? customRange.endDate : getDateRange(range).endDate}
+        />
+      )}
 
       {/* Top Pages */}
       {!loading && analytics?.pages?.length > 0 && (
