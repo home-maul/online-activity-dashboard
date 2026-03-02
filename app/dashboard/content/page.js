@@ -7,6 +7,7 @@ import DateRangeSelector from "@/components/dashboard/date-range-selector";
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/dashboard/loading-skeleton";
 import LineChart from "@/components/charts/line-chart";
 import DonutChart from "@/components/charts/donut-chart";
+import MockBanner from "@/components/dashboard/mock-banner";
 import { getContentData } from "@/lib/mock-data";
 
 function getDateRange(days) {
@@ -67,17 +68,13 @@ export default function ContentPage() {
 
   return (
     <div className="space-y-6">
+      {isMock && <MockBanner />}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-navy tracking-tight">Content & SEO</h2>
           <p className="text-[12px] text-gray-muted mt-0.5">Search Console, landing pages, and organic performance</p>
         </div>
         <div className="flex items-center gap-3">
-          {isMock && (
-            <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
-              Mock data — add SEARCH_CONSOLE_SITE_URL
-            </span>
-          )}
           <DateRangeSelector
             value={range}
             onChange={setRange}

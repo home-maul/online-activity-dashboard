@@ -6,6 +6,7 @@ import ChartCard from "@/components/dashboard/chart-card";
 import LineChart from "@/components/charts/line-chart";
 import DonutChart from "@/components/charts/donut-chart";
 import ChannelBar from "@/components/charts/channel-bar";
+import MockBanner from "@/components/dashboard/mock-banner";
 import { getChannelsOverview } from "@/lib/mock-data";
 
 function usePipedriveOrMock() {
@@ -75,16 +76,12 @@ export default function ChannelsPage() {
 
   return (
     <div className="space-y-6">
+      {isMock && <MockBanner />}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-navy tracking-tight">Channels</h2>
           <p className="text-[12px] text-gray-muted mt-0.5">Cross-platform performance overview</p>
         </div>
-        {isMock && (
-          <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
-            Mock data — connect Pipedrive to go live
-          </span>
-        )}
       </div>
 
       {/* Top-level KPIs */}

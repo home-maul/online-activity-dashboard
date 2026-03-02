@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ChartCard from "@/components/dashboard/chart-card";
+import MockBanner from "@/components/dashboard/mock-banner";
 import { getCampaigns } from "@/lib/mock-data";
 
 const PLATFORM_COLORS = {
@@ -68,14 +69,12 @@ export default function CampaignsPage() {
 
   return (
     <div className="space-y-6">
+      <MockBanner />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-navy tracking-tight">Campaigns</h2>
           <p className="text-[12px] text-gray-muted mt-0.5">Drill into individual campaign performance</p>
         </div>
-        <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
-          Mock data
-        </span>
       </div>
 
       {/* Platform summary cards */}

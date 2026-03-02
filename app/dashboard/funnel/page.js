@@ -3,6 +3,7 @@
 import ChartCard from "@/components/dashboard/chart-card";
 import FunnelChart from "@/components/charts/funnel-chart";
 import LineChart from "@/components/charts/line-chart";
+import MockBanner from "@/components/dashboard/mock-banner";
 import { getFunnelData } from "@/lib/mock-data";
 
 const CHANNEL_COLORS = {
@@ -17,14 +18,12 @@ export default function FunnelPage() {
 
   return (
     <div className="space-y-6">
+      <MockBanner />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-navy tracking-tight">Lead Funnel</h2>
           <p className="text-[12px] text-gray-muted mt-0.5">From impression to customer — where are leads dropping off?</p>
         </div>
-        <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
-          Mock data
-        </span>
       </div>
 
       {/* Overall funnel */}
