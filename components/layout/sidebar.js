@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -28,9 +29,18 @@ export default function Sidebar() {
 
   return (
     <aside className="w-[260px] bg-navy flex flex-col min-h-screen">
-      <div className="px-6 py-7 border-b border-navy-light">
-        <h1 className="text-[15px] font-semibold text-white tracking-tight">Marketing Dashboard</h1>
-        <p className="text-[11px] text-gray-brand mt-1 tracking-wide">Homerunner</p>
+      <div className="px-6 py-6 border-b border-navy-light flex items-center gap-3">
+        <Image
+          src="/logo.png"
+          alt="Homerunner"
+          width={36}
+          height={36}
+          className="rounded-lg"
+        />
+        <div>
+          <h1 className="text-[15px] font-semibold text-white tracking-tight">Marketing</h1>
+          <p className="text-[11px] text-gray-brand mt-0.5 tracking-wide">Homerunner</p>
+        </div>
       </div>
       <nav className="flex-1 px-3 pt-4 space-y-5">
         {NAV_SECTIONS.map((section) => (
