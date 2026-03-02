@@ -8,9 +8,9 @@ export default function MetricCard({ title, value, format = "number", change, in
   const isNeutral = change === 0;
 
   return (
-    <div className="bg-surface rounded-2xl border border-border p-5 hover:shadow-[0_2px_20px_rgba(0,0,0,0.04)] transition-all duration-300">
+    <div className="bg-surface rounded-2xl border border-border p-5 hover:shadow-[0_4px_24px_rgba(43,124,233,0.08)] hover:border-blue/20 transition-all duration-300 group">
       <p className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">{title}</p>
-      <p className="mt-2 text-[26px] font-semibold tracking-tight text-navy">{formatted}</p>
+      <p className="mt-2 text-[26px] font-semibold tracking-tight text-navy group-hover:text-blue-mid transition-colors duration-300">{formatted}</p>
       <div className="mt-1.5 flex items-center gap-1.5">
         {hasChange && (
           <>
