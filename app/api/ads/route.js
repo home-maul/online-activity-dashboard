@@ -8,16 +8,9 @@ export async function GET(request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!process.env.GOOGLE_ADS_DEVELOPER_TOKEN) {
+  if (!process.env.GA4_PROPERTY_ID) {
     return Response.json(
-      { error: "Not configured", detail: "GOOGLE_ADS_DEVELOPER_TOKEN is missing" },
-      { status: 503 }
-    );
-  }
-
-  if (!process.env.GOOGLE_ADS_CUSTOMER_ID) {
-    return Response.json(
-      { error: "Not configured", detail: "GOOGLE_ADS_CUSTOMER_ID is missing" },
+      { error: "Not configured", detail: "GA4_PROPERTY_ID is missing" },
       { status: 503 }
     );
   }
