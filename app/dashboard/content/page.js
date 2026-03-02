@@ -1,88 +1,153 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
+import MetricCard from "@/components/dashboard/metric-card";
 import ChartCard from "@/components/dashboard/chart-card";
+import DateRangeSelector from "@/components/dashboard/date-range-selector";
+import { MetricCardSkeleton, ChartSkeleton } from "@/components/dashboard/loading-skeleton";
 import LineChart from "@/components/charts/line-chart";
-import BarChart from "@/components/charts/bar-chart";
+import DonutChart from "@/components/charts/donut-chart";
 import { getContentData } from "@/lib/mock-data";
 
-function formatDuration(seconds) {
-  if (!seconds) return "0s";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+function getDateRange(days) {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - Number(days));
+  return {
+    startDate: start.toISOString().split("T")[0],
+    endDate: end.toISOString().split("T")[0],
+  };
 }
 
 export default function ContentPage() {
-  const data = getContentData();
+  const [range, setRange] = useState("30");
+  const [customRange, setCustomRange] = useState(null);
+  const [gsc, setGsc] = useState(null);
+  const [isMock, setIsMock] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Mock data for sections not yet connected
+  const mockData = getContentData();
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const { startDate, endDate } =
+      range === "custom" && customRange ? customRange : getDateRange(range);
+
+    try {
+      const res = await fetch(`/api/search-console?startDate=${startDate}&endDate=${endDate}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Search Console not configured");
+      }
+      setGsc(await res.json());
+      setIsMock(false);
+    } catch {
+      // Fall back to mock data
+      setGsc(null);
+      setIsMock(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [range, customRange]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleCustomRange = (cr) => {
+    setCustomRange(cr);
+    setRange("custom");
+  };
+
+  const t = gsc?.totals;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-navy tracking-tight">Content & Organic</h2>
-          <p className="text-[12px] text-gray-muted mt-0.5">SEO, landing pages, and organic social performance</p>
+          <h2 className="text-lg font-semibold text-navy tracking-tight">Content & SEO</h2>
+          <p className="text-[12px] text-gray-muted mt-0.5">Search Console, landing pages, and organic performance</p>
         </div>
-        <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
-          Mock data
-        </span>
+        <div className="flex items-center gap-3">
+          {isMock && (
+            <span className="text-[11px] text-gray-brand px-3 py-1.5 bg-surface rounded-lg border border-border">
+              Mock data — add SEARCH_CONSOLE_SITE_URL
+            </span>
+          )}
+          <DateRangeSelector
+            value={range}
+            onChange={setRange}
+            customRange={customRange}
+            onCustomRangeChange={handleCustomRange}
+          />
+        </div>
       </div>
 
-      {/* Organic vs Paid */}
-      <ChartCard title="Organic vs Paid Sessions">
-        <LineChart
-          data={data.organicVsPaid}
-          lines={[
-            { dataKey: "organic", name: "Organic" },
-            { dataKey: "paid", name: "Paid" },
-          ]}
-        />
+      {/* Search Console KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
+        ) : isMock ? (
+          <>
+            <MetricCard title="Organic Clicks" value={8850} />
+            <MetricCard title="Impressions" value={72600} />
+            <MetricCard title="Avg CTR" value={12.2} format="percent" />
+            <MetricCard title="Avg Position" value={4.8} format="decimal" />
+          </>
+        ) : (
+          <>
+            <MetricCard title="Organic Clicks" value={t.clicks} />
+            <MetricCard title="Impressions" value={t.impressions} />
+            <MetricCard title="Avg CTR" value={t.ctr} format="percent" />
+            <MetricCard title="Avg Position" value={t.position} format="decimal" />
+          </>
+        )}
+      </div>
+
+      {/* Clicks & Impressions over time */}
+      <ChartCard title="Organic Clicks & Impressions Over Time">
+        {loading ? (
+          <div className="h-[280px] bg-blue-sky/80 rounded-xl animate-pulse" />
+        ) : (
+          <LineChart
+            data={isMock ? mockData.organicVsPaid.map((d) => ({ date: d.date, clicks: d.organic, impressions: d.organic * 8 })) : gsc.timeSeries}
+            lines={[
+              { dataKey: "clicks", name: "Clicks" },
+              { dataKey: "impressions", name: "Impressions" },
+            ]}
+          />
+        )}
       </ChartCard>
 
-      {/* Landing pages table */}
-      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-        <div className="px-6 py-4 border-b border-border">
-          <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Landing Pages by Lead Conversion</h3>
-          <p className="text-[11px] text-gray-brand mt-0.5">Which pages turn visitors into leads?</p>
+      {/* Device breakdown */}
+      {!isMock && gsc?.devices?.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <ChartCard title="Clicks by Device">
+            <DonutChart
+              data={gsc.devices}
+              dataKey="clicks"
+              nameKey="device"
+            />
+          </ChartCard>
+          <ChartCard title="Impressions by Device">
+            <DonutChart
+              data={gsc.devices}
+              dataKey="impressions"
+              nameKey="device"
+            />
+          </ChartCard>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="border-b border-border bg-blue-sky/40">
-                <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Page</th>
-                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
-                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Leads</th>
-                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">CVR</th>
-                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Time</th>
-                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Bounce</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.landingPages.map((p) => (
-                <tr key={p.page} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
-                  <td className="px-6 py-3 font-mono text-xs text-navy/80">{p.page}</td>
-                  <td className="px-6 py-3 text-right text-gray-muted">{p.sessions.toLocaleString()}</td>
-                  <td className="px-6 py-3 text-right font-medium text-navy/80">{p.leads}</td>
-                  <td className="px-6 py-3 text-right">
-                    <span className={`inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                      p.conversionRate >= 2.5 ? "bg-emerald-50 text-emerald-700" : p.conversionRate >= 1.5 ? "bg-amber-50 text-amber-700" : "bg-blue-sky text-gray-muted"
-                    }`}>
-                      {p.conversionRate}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-right text-gray-muted">{formatDuration(p.avgTime)}</td>
-                  <td className="px-6 py-3 text-right text-gray-muted">{p.bounceRate}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
 
-      {/* Search queries */}
+      {/* Search queries table */}
       <div className="bg-surface rounded-2xl border border-border overflow-hidden">
         <div className="px-6 py-4 border-b border-border">
           <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Search Queries</h3>
-          <p className="text-[11px] text-gray-brand mt-0.5">Google Search Console — queries driving traffic and leads</p>
+          <p className="text-[11px] text-gray-brand mt-0.5">Google Search Console — queries driving organic traffic</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
@@ -93,11 +158,10 @@ export default function ContentPage() {
                 <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Clicks</th>
                 <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">CTR</th>
                 <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Position</th>
-                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Leads</th>
               </tr>
             </thead>
             <tbody>
-              {data.searchQueries.map((q) => (
+              {(isMock ? mockData.searchQueries : gsc?.queries || []).map((q) => (
                 <tr key={q.query} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
                   <td className="px-6 py-3 font-medium text-navy/80">{q.query}</td>
                   <td className="px-6 py-3 text-right text-gray-muted">{q.impressions.toLocaleString()}</td>
@@ -110,7 +174,6 @@ export default function ContentPage() {
                       {q.position.toFixed(1)}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-right font-medium text-navy/80">{q.leads}</td>
                 </tr>
               ))}
             </tbody>
@@ -118,11 +181,87 @@ export default function ContentPage() {
         </div>
       </div>
 
-      {/* Organic social */}
+      {/* Top pages from Search Console */}
+      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Pages by Organic Traffic</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-border bg-blue-sky/40">
+                <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Page</th>
+                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Clicks</th>
+                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Impressions</th>
+                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">CTR</th>
+                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(isMock ? mockData.landingPages.map((p) => ({ page: p.page, clicks: p.sessions, impressions: p.sessions * 8, ctr: p.conversionRate, position: 4.5 })) : gsc?.pages || []).map((p) => (
+                <tr key={p.page} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                  <td className="px-6 py-3 font-mono text-xs text-navy/80">{p.page}</td>
+                  <td className="px-6 py-3 text-right text-gray-muted">{p.clicks.toLocaleString()}</td>
+                  <td className="px-6 py-3 text-right text-gray-muted">{p.impressions.toLocaleString()}</td>
+                  <td className="px-6 py-3 text-right text-gray-muted">{p.ctr}%</td>
+                  <td className="px-6 py-3 text-right">
+                    <span className={`inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium ${
+                      p.position <= 3 ? "bg-emerald-50 text-emerald-700" : p.position <= 6 ? "bg-amber-50 text-amber-700" : "bg-blue-sky text-gray-muted"
+                    }`}>
+                      {p.position.toFixed(1)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Countries */}
+      {!isMock && gsc?.countries?.length > 0 && (
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Countries by Organic Search</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Country</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Clicks</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Impressions</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">CTR</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Position</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gsc.countries.map((c) => (
+                  <tr key={c.country} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-medium text-navy/80">{c.country}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.clicks.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.impressions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{c.ctr}%</td>
+                    <td className="px-6 py-3 text-right">
+                      <span className={`inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium ${
+                        c.position <= 3 ? "bg-emerald-50 text-emerald-700" : c.position <= 6 ? "bg-amber-50 text-amber-700" : "bg-blue-sky text-gray-muted"
+                      }`}>
+                        {c.position.toFixed(1)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Organic social — still mock until social APIs are connected */}
       <div className="bg-surface rounded-2xl border border-border overflow-hidden">
         <div className="px-6 py-4 border-b border-border">
           <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Organic Social</h3>
-          <p className="text-[11px] text-gray-brand mt-0.5">Unpaid social media performance</p>
+          <p className="text-[11px] text-gray-brand mt-0.5">Unpaid social media performance (mock data)</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
@@ -133,18 +272,16 @@ export default function ContentPage() {
                 <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Impressions</th>
                 <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Engagement</th>
                 <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Clicks</th>
-                <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Leads</th>
               </tr>
             </thead>
             <tbody>
-              {data.socialOrganic.map((s) => (
+              {mockData.socialOrganic.map((s) => (
                 <tr key={s.platform} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
                   <td className="px-6 py-3 font-medium text-navy/80">{s.platform}</td>
                   <td className="px-6 py-3 text-right text-gray-muted">{s.followers.toLocaleString()}</td>
                   <td className="px-6 py-3 text-right text-gray-muted">{s.impressions.toLocaleString()}</td>
                   <td className="px-6 py-3 text-right text-gray-muted">{s.engagement}%</td>
                   <td className="px-6 py-3 text-right text-gray-muted">{s.clicks.toLocaleString()}</td>
-                  <td className="px-6 py-3 text-right font-medium text-navy/80">{s.leads}</td>
                 </tr>
               ))}
             </tbody>
