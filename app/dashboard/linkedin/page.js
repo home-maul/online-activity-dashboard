@@ -297,38 +297,48 @@ export default function LinkedInPage() {
           </div>
 
           {organicPosts.posts?.length > 0 && (
-            <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-              <div className="px-6 py-4 border-b border-border">
-                <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Recent Posts</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-[13px]">
-                  <thead>
-                    <tr className="border-b border-border bg-blue-sky/40">
-                      <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Post</th>
-                      <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Date</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Impressions</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Reactions</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Comments</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Shares</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {organicPosts.posts.map((post) => (
-                      <tr key={post.id} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
-                        <td className="px-6 py-3 text-navy/80 max-w-xs">
-                          <span title={post.text}>{truncate(post.text)}</span>
-                        </td>
-                        <td className="px-6 py-3 text-gray-muted whitespace-nowrap">{formatDate(post.publishedAt)}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">{post.impressions.toLocaleString()}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">{post.reactions.toLocaleString()}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">{post.comments.toLocaleString()}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">{post.shares.toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            <div className="space-y-3">
+              <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider px-1">Recent Posts</h3>
+              {organicPosts.posts.map((post) => (
+                <div key={post.id} className="bg-surface rounded-2xl border border-border p-5 hover:shadow-[0_4px_24px_var(--hover-glow,rgba(43,124,233,0.08))] hover:border-blue/20 transition-all duration-300">
+                  <div className="flex gap-4">
+                    {/* Preview thumbnail */}
+                    {post.preview?.imageUrl && (
+                      <div className="flex-shrink-0">
+                        <img
+                          src={post.preview.imageUrl}
+                          alt=""
+                          className="w-20 h-20 rounded-lg object-cover bg-blue-sky/40"
+                          onError={(e) => { e.target.style.display = "none"; }}
+                        />
+                      </div>
+                    )}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-[13px] text-navy/80 leading-relaxed" title={post.text}>
+                          {truncate(post.text, 150)}
+                        </p>
+                        <span className="text-[11px] text-gray-muted whitespace-nowrap flex-shrink-0">{formatDate(post.publishedAt)}</span>
+                      </div>
+                      {/* Article link preview */}
+                      {post.preview?.title && post.preview?.url && (
+                        <a href={post.preview.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-1.5 text-[11px] text-blue-mid hover:underline truncate max-w-md">
+                          {post.preview.title}
+                        </a>
+                      )}
+                      {/* Metrics row */}
+                      <div className="flex items-center gap-5 mt-3 text-[12px] text-gray-muted">
+                        <span>{post.impressions.toLocaleString()} impressions</span>
+                        <span>{post.reactions.toLocaleString()} reactions</span>
+                        <span>{post.comments.toLocaleString()} comments</span>
+                        <span>{post.shares.toLocaleString()} shares</span>
+                        {post.clicks > 0 && <span>{post.clicks.toLocaleString()} clicks</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
