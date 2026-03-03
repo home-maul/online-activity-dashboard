@@ -67,26 +67,26 @@ export const THEME_TOOLTIP = {
     value: "text-[#070E1A]",
   },
   prism: {
-    bg: "bg-white/95",
-    border: "border-[#E5E4DF]",
-    shadow: "shadow-[0_8px_32px_rgba(26,29,38,0.10)]",
-    label: "text-[#9CA3AF]",
-    name: "text-[#1A1D26]/70",
-    value: "text-[#1A1D26]",
+    bg: "bg-[#FFFDF9]/95",
+    border: "border-[#DDD5C8]",
+    shadow: "shadow-[0_8px_32px_rgba(45,42,36,0.10)]",
+    label: "text-[#A09787]",
+    name: "text-[#2D2A24]/70",
+    value: "text-[#2D2A24]",
   },
 };
 
 export const THEME_GRID = {
   corporate: "#E8F1FF",
-  prism: "#F0EEFB",
+  prism: "#EDE8F8",
 };
 
 export const THEME_AXIS = {
   corporate: "#8896A8",
-  prism: "#9CA3AF",
+  prism: "#A09787",
 };
 
 export const THEME_CENTER_LABEL = {
   corporate: "#070E1A",
-  prism: "#1A1D26",
+  prism: "#2D2A24",
 };

@@ -38,31 +38,31 @@ body {
   --hover-glow: rgba(43, 124, 233, 0.08);
 }
 
-/* ─── Prism (Stripe/Intercom-inspired) Theme ─── */
+/* ─── Prism (Sand & Violet) Theme ─── */
 [data-theme="prism"] {
   --hover-glow: rgba(108, 92, 231, 0.08);
 
-  --color-navy: #1A1D26;
-  --color-navy-light: #F5F5F3;
-  --color-navy-muted: #EEEEE8;
-  --color-blue: #6C5CE7;
-  --color-blue-deep: #F0EEFB;
-  --color-blue-slate: #7C7C8A;
-  --color-blue-mid: #6C5CE7;
+  --color-navy: #2D2A24;
+  --color-navy-light: #F0EBE1;
+  --color-navy-muted: #E8E1D4;
+  --color-blue: #7C5CE7;
+  --color-blue-deep: #EDE8F8;
+  --color-blue-slate: #8A8278;
+  --color-blue-mid: #7C5CE7;
   --color-blue-royal: #5B21B6;
   --color-blue-soft: #A78BFA;
-  --color-blue-sky: #F8F8F6;
-  --color-blue-ice: #F0EEFB;
-  --color-gray-brand: #6B7280;
-  --color-gray-muted: #9CA3AF;
-  --color-border: #E5E4DF;
-  --color-surface: #FFFFFF;
-  --color-sidebar: #FAFAF8;
-  --color-sidebar-border: #E5E4DF;
-  --color-sidebar-text: #1A1D26;
-  --color-sidebar-text-secondary: #6B7280;
-  --color-sidebar-text-muted: #9CA3AF;
-  --color-sidebar-hover: #F0EEFB;
-  --color-sidebar-active-bg: rgba(108, 92, 231, 0.12);
-  --color-sidebar-active-text: #6C5CE7;
+  --color-blue-sky: #F3EDE4;
+  --color-blue-ice: #EDE8F8;
+  --color-gray-brand: #7A7268;
+  --color-gray-muted: #A09787;
+  --color-border: #DDD5C8;
+  --color-surface: #FFFDF9;
+  --color-sidebar: #F0EBE1;
+  --color-sidebar-border: #DDD5C8;
+  --color-sidebar-text: #2D2A24;
+  --color-sidebar-text-secondary: #7A7268;
+  --color-sidebar-text-muted: #A09787;
+  --color-sidebar-hover: #E8E1D4;
+  --color-sidebar-active-bg: rgba(124, 92, 231, 0.14);
+  --color-sidebar-active-text: #7C5CE7;
 }

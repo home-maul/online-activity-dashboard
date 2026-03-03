@@ -11,12 +11,14 @@ export default function ThemeToggle() {
       onClick={() => setTheme(isPrism ? "corporate" : "prism")}
       className="fixed bottom-5 left-5 z-50 flex items-center gap-2 h-9 pl-2.5 pr-3.5 rounded-full border backdrop-blur-xl transition-all duration-500 hover:scale-[1.04] active:scale-[0.97] cursor-pointer"
       style={{
-        background: "rgba(255,255,255,0.75)",
+        background: isPrism
+          ? "rgba(240,235,225,0.85)"
+          : "rgba(255,255,255,0.75)",
         borderColor: isPrism
-          ? "rgba(108,92,231,0.3)"
+          ? "rgba(124,92,231,0.3)"
           : "rgba(0,0,0,0.06)",
         boxShadow: isPrism
-          ? "0 4px 24px rgba(108,92,231,0.12), 0 0 0 1px rgba(108,92,231,0.08)"
+          ? "0 4px 24px rgba(124,92,231,0.12), 0 0 0 1px rgba(124,92,231,0.08)"
           : "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
       }}
       aria-label={`Switch to ${isPrism ? "corporate" : "prism"} theme`}
@@ -45,7 +47,7 @@ export default function ThemeToggle() {
       </span>
       <span
         className="text-[11px] font-medium tracking-wide transition-colors duration-500"
-        style={{ color: isPrism ? "#6C5CE7" : "#6B7280" }}
+        style={{ color: isPrism ? "#7C5CE7" : "#6B7280" }}
       >
         {isPrism ? "Prism" : "Corporate"}
       </span>
