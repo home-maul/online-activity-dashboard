@@ -37,7 +37,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[260px] bg-sidebar flex flex-col min-h-screen">
+    <aside className="w-[260px] bg-sidebar flex flex-col sticky top-0 h-screen overflow-y-auto">
       <div className="px-6 py-6 border-b border-sidebar-border flex items-center gap-3">
         <Image
           src="/logo.png"

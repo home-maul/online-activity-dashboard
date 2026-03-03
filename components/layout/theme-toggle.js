@@ -9,7 +9,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isPrism ? "corporate" : "prism")}
-      className="fixed bottom-5 left-5 z-50 flex items-center gap-2 h-9 pl-2.5 pr-3.5 rounded-full border backdrop-blur-xl transition-all duration-500 hover:scale-[1.04] active:scale-[0.97] cursor-pointer"
+      className="fixed bottom-4 left-4 z-50 flex items-center gap-1.5 h-7 pl-2 pr-2.5 rounded-full border backdrop-blur-xl transition-all duration-500 hover:scale-[1.04] active:scale-[0.97] cursor-pointer"
       style={{
         background: isPrism
           ? "rgba(240,235,225,0.85)"
@@ -24,7 +24,7 @@ export default function ThemeToggle() {
       aria-label={`Switch to ${isPrism ? "corporate" : "prism"} theme`}
     >
       <span
-        className="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500"
+        className="w-4 h-4 rounded-full flex items-center justify-center transition-all duration-500"
         style={{
           background: isPrism
             ? "linear-gradient(135deg, #6C5CE7, #A78BFA)"
@@ -35,18 +35,18 @@ export default function ThemeToggle() {
         }}
       >
         {isPrism ? (
-          <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
+          <svg className="w-2 h-2 text-white" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
             <path d="M8 2l1.5 4.5L14 8l-4.5 1.5L8 14l-1.5-4.5L2 8l4.5-1.5z" />
           </svg>
         ) : (
-          <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <svg className="w-2 h-2 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <circle cx="8" cy="8" r="2.5" />
             <path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M4.1 4.1l1 1M10.9 10.9l1 1M4.1 11.9l1-1M10.9 5.1l1-1" />
           </svg>
         )}
       </span>
       <span
-        className="text-[11px] font-medium tracking-wide transition-colors duration-500"
+        className="text-[10px] font-medium tracking-wide transition-colors duration-500"
         style={{ color: isPrism ? "#7C5CE7" : "#6B7280" }}
       >
         {isPrism ? "Prism" : "Corporate"}
