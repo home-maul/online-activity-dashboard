@@ -6,29 +6,32 @@ import { usePathname } from "next/navigation";
 
 const NAV_SECTIONS = [
   {
-    label: "Site",
+    label: "Awareness",
     items: [
-      { href: "/dashboard", label: "Overview", icon: LayoutIcon },
-      { href: "/dashboard/analytics", label: "Analytics", icon: ChartIcon },
-      { href: "/dashboard/ads", label: "Ads", icon: MegaphoneIcon },
-    ],
-  },
-  {
-    label: "Marketing",
-    items: [
-      { href: "/dashboard/channels", label: "Channels", icon: ChannelsIcon },
-      { href: "/dashboard/campaigns", label: "Campaigns", icon: TargetIcon },
-      { href: "/dashboard/funnel", label: "Lead Funnel", icon: FunnelIcon },
       { href: "/dashboard/content", label: "Content & SEO", icon: PenIcon },
     ],
   },
   {
-    label: "Platforms",
+    label: "Acquisition",
     items: [
-      { href: "/dashboard/linkedin", label: "LinkedIn", icon: LinkedInIcon },
-      { href: "/dashboard/meta", label: "Meta", icon: MetaIcon },
-      { href: "/dashboard/reddit", label: "Reddit", icon: RedditIcon },
-      { href: "/dashboard/microsoft-ads", label: "Microsoft Ads", icon: MicrosoftIcon },
+      { href: "/dashboard/campaigns", label: "Campaigns", icon: TargetIcon },
+      { href: "/dashboard/channels", label: "Channels", icon: ChannelsIcon },
+      { href: "/dashboard/platforms", label: "Platforms", icon: PlatformsIcon },
+    ],
+  },
+  {
+    label: "Pipeline",
+    items: [
+      { href: "/dashboard/funnel", label: "Lead Funnel", icon: FunnelIcon },
+      { href: "/dashboard/campaign-leads", label: "Campaign → Leads", icon: LinkIcon },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      { href: "/dashboard/analytics", label: "Analytics", icon: ChartIcon },
+      { href: "/dashboard/ads", label: "Ads", icon: MegaphoneIcon },
+      { href: "/dashboard/insights", label: "AI Insights", icon: SparkleIcon },
     ],
   },
 ];
@@ -52,6 +55,19 @@ export default function Sidebar() {
         </div>
       </div>
       <nav className="flex-1 px-3 pt-4 space-y-5">
+        <div>
+          <Link
+            href="/dashboard"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
+              pathname === "/dashboard"
+                ? "bg-sidebar-active-bg text-sidebar-active-text"
+                : "text-sidebar-text-secondary hover:bg-sidebar-hover hover:text-sidebar-text"
+            }`}
+          >
+            <LayoutIcon className="w-[18px] h-[18px] opacity-80" />
+            Overview
+          </Link>
+        </div>
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
             <p className="px-3.5 mb-1.5 text-[10px] font-medium text-sidebar-text-muted uppercase tracking-widest">{section.label}</p>
@@ -78,7 +94,7 @@ export default function Sidebar() {
         ))}
       </nav>
       <div className="px-5 py-4 border-t border-sidebar-border">
-        <p className="text-[11px] text-sidebar-text-muted tracking-wide">Powered by GA4</p>
+        <p className="text-[11px] text-sidebar-text-muted tracking-wide">Powered by GA4 + Pipedrive</p>
       </div>
     </aside>
   );
@@ -169,6 +185,30 @@ function MicrosoftIcon({ className }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M0 0h11.377v11.377H0zm12.623 0H24v11.377H12.623zM0 12.623h11.377V24H0zm12.623 0H24V24H12.623z" />
+    </svg>
+  );
+}
+
+function PlatformsIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m-15 0A2.243 2.243 0 0 0 3 12v3c0 1.035.84 1.875 1.875 1.875h14.25c1.035 0 1.875-.84 1.875-1.875v-3c0-.621-.252-1.184-.66-1.593M4.5 9.878h15" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+    </svg>
+  );
+}
+
+function SparkleIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
     </svg>
   );
 }

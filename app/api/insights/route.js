@@ -11,6 +11,7 @@ async function fetchDashboardData(accessToken, startDate, endDate) {
     { key: "campaigns", path: `/api/campaigns?${params}` },
     { key: "ads", path: `/api/ads?${params}` },
     { key: "searchConsole", path: `/api/search-console?${params}` },
+    { key: "pipedrive" },
   ];
 
   const results = {};
@@ -31,6 +32,10 @@ async function fetchDashboardData(accessToken, startDate, endDate) {
         } else if (key === "searchConsole") {
           const { fetchSearchConsole } = await import("@/lib/connectors/search-console");
           results[key] = await fetchSearchConsole(accessToken, { startDate, endDate });
+        } else if (key === "pipedrive") {
+          const { fetchPipedriveData } = await import("@/lib/connectors/pipedrive");
+          const pd = await fetchPipedriveData({ startDate, endDate });
+          if (!pd.mock) results[key] = pd;
         }
       } catch (err) {
         console.warn(`[Insights] Failed to fetch ${key}:`, err.message);
@@ -85,6 +90,36 @@ function buildDataSummary(data) {
     }
   }
 
+  if (data.pipedrive?.totals) {
+    const pt = data.pipedrive.totals;
+    parts.push(`PIPEDRIVE CRM PIPELINE:
+- Total Deals: ${pt.deals}, Open: ${pt.open}, Won: ${pt.won}, Lost: ${pt.lost}
+- Pipeline Value: $${pt.pipeline}, Won Value: $${pt.wonValue}
+- Win Rate: ${pt.winRate}%, Avg Deal Size: $${pt.avgDealSize}
+- Avg Sales Cycle: ${pt.avgSalesCycle} days, Active Leads: ${pt.leads}`);
+
+    if (data.pipedrive.bySource?.length) {
+      parts.push(`Deals by Source:\n${data.pipedrive.bySource.slice(0, 8).map((s) =>
+        `  ${s.source}: ${s.deals} deals, ${s.won} won, ${s.lost} lost, $${s.wonValue} won value`
+      ).join("\n")}`);
+    }
+
+    if (data.pipedrive.salesCycle?.length) {
+      parts.push(`Sales Cycle by Source:\n${data.pipedrive.salesCycle.slice(0, 6).map((s) =>
+        `  ${s.source}: ${s.avgDays} avg days (${s.deals} deals)`
+      ).join("\n")}`);
+    }
+
+    if (data.pipedrive.byCampaign?.length) {
+      const campaignDeals = data.pipedrive.byCampaign.filter((c) => c.campaign !== "No Campaign").slice(0, 8);
+      if (campaignDeals.length) {
+        parts.push(`Deals by Campaign:\n${campaignDeals.map((c) =>
+          `  ${c.campaign} (${c.source}): ${c.deals} deals, ${c.won} won, $${c.wonValue} value`
+        ).join("\n")}`);
+      }
+    }
+  }
+
   return parts.join("\n\n");
 }
 
@@ -123,7 +158,7 @@ export async function GET(request) {
       messages: [
         {
           role: "user",
-          content: `You are a senior marketing analyst for Homerunner, a logistics/delivery platform. Analyze this marketing dashboard data and provide actionable insights.
+          content: `You are a senior marketing analyst for Homerunner, a logistics/delivery platform with long B2B sales cycles. Analyze this marketing dashboard data and provide actionable insights that connect top-of-funnel activity to pipeline outcomes.
 
 DATA (${startDate} to ${endDate}):
 ${summary}
@@ -135,12 +170,14 @@ Respond with a JSON array of 4-6 insight objects. Each object must have:
 - "metric": the key number or percentage driving this insight
 - "priority": "high", "medium", or "low"
 
-Focus on:
-1. Which channels/campaigns are performing best and worst
-2. Conversion rate optimization opportunities
-3. Budget allocation recommendations
-4. SEO/content opportunities from search queries
-5. Trends that need attention (positive or negative)
+Focus on (prioritize pipeline insights when CRM data is available):
+1. Which sources/campaigns produce leads that actually close (win rate by source)
+2. Cost efficiency: cost per qualified lead, not just cost per click
+3. Sales cycle optimization: which channels close faster
+4. Pipeline velocity: where deals get stuck, which stages have drop-off
+5. Budget allocation: shift spend toward sources with best deal-to-close ratio
+6. Channel/campaign performance gaps between traffic and pipeline outcomes
+7. SEO/content opportunities from search queries
 
 Return ONLY the JSON array, no other text.`,
         },

@@ -7,7 +7,6 @@ import DateRangeSelector from "@/components/dashboard/date-range-selector";
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/dashboard/loading-skeleton";
 import LineChart from "@/components/charts/line-chart";
 import BarChart from "@/components/charts/bar-chart";
-import DonutChart from "@/components/charts/donut-chart";
 import InsightsPanel from "@/components/dashboard/insights-panel";
 
 function getDateRange(days) {
@@ -24,6 +23,7 @@ export default function DashboardOverview() {
   const [range, setRange] = useState("30");
   const [customRange, setCustomRange] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [pipedrive, setPipedrive] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,12 +36,22 @@ export default function DashboardOverview() {
     const params = `startDate=${startDate}&endDate=${endDate}`;
 
     try {
-      const res = await fetch(`/api/analytics?${params}`);
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || "Failed to fetch analytics data");
-      }
-      setAnalytics(await res.json());
+      const [analyticsRes, pipedriveRes] = await Promise.allSettled([
+        fetch(`/api/analytics?${params}`).then(async (r) => {
+          if (!r.ok) return null;
+          return r.json();
+        }),
+        fetch(`/api/pipedrive?${params}`).then(async (r) => {
+          if (!r.ok) return null;
+          return r.json();
+        }),
+      ]);
+
+      const analyticsData = analyticsRes.status === "fulfilled" ? analyticsRes.value : null;
+      const pipedriveData = pipedriveRes.status === "fulfilled" ? pipedriveRes.value : null;
+
+      setAnalytics(analyticsData);
+      setPipedrive(pipedriveData && !pipedriveData.mock ? pipedriveData : null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -58,27 +68,14 @@ export default function DashboardOverview() {
     setRange("custom");
   };
 
-  if (error) {
-    return (
-      <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-8 text-center">
-        <p className="text-rose-600 font-medium text-[15px]">Error loading data</p>
-        <p className="text-rose-400 text-sm mt-1">{error}</p>
-        <button
-          onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-navy/90 text-white text-sm rounded-xl hover:bg-navy transition-colors duration-200"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   const t = analytics?.totals;
   const c = t?.change;
+  const p = pipedrive?.totals;
 
-  const sessionsPerUser = t?.sessions && t?.users ? (t.sessions / t.users).toFixed(1) : null;
-  const pagesPerSession = t?.pageViews && t?.sessions ? (t.pageViews / t.sessions).toFixed(1) : null;
   const conversionRate = t?.conversions && t?.sessions ? ((t.conversions / t.sessions) * 100).toFixed(2) : null;
+
+  // Build blended sources table from Pipedrive bySource + GA4 sources
+  const bestSources = buildBestSources(analytics?.sources, pipedrive?.bySource, pipedrive?.salesCycle);
 
   return (
     <div className="space-y-6">
@@ -92,48 +89,66 @@ export default function DashboardOverview() {
         />
       </div>
 
-      {/* Primary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
-        ) : (
-          <>
-            <MetricCard title="Sessions" value={t?.sessions} change={c?.sessions} />
-            <MetricCard title="Users" value={t?.users} change={c?.users} />
-            <MetricCard title="Page Views" value={t?.pageViews} change={c?.pageViews} />
-            <MetricCard title="New Users" value={t?.newUsers} change={c?.newUsers} />
-          </>
-        )}
+      {/* Connection status */}
+      {!loading && !analytics && !pipedrive && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/50 px-5 py-4 text-[12px] text-amber-700">
+          {error
+            ? <><span className="font-medium">Could not load data:</span> {error}. <button onClick={fetchData} className="underline font-medium">Retry</button></>
+            : "No data sources connected yet. Sign in with Google for GA4 data, and set up Pipedrive for pipeline metrics."
+          }
+        </div>
+      )}
+
+      {/* Row 1 — Pipeline KPIs */}
+      {pipedrive ? (
+        <div>
+          <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider px-1 mb-3">Pipeline</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
+            ) : (
+              <>
+                <MetricCard title="Open Deals" value={p?.open} subtitle={`${p?.deals || 0} total`} />
+                <MetricCard title="Pipeline Value" value={p?.pipeline} format="currency" />
+                <MetricCard title="Win Rate" value={p?.winRate} format="percent" subtitle={`${p?.won || 0} won`} />
+                <MetricCard title="Avg Sales Cycle" value={p?.avgSalesCycle ? `${p.avgSalesCycle}d` : null} subtitle="days to close" />
+              </>
+            )}
+          </div>
+        </div>
+      ) : !loading ? (
+        <div className="rounded-xl border border-blue/10 bg-blue-sky/40 px-5 py-3 text-[12px] text-gray-muted">
+          Connect Pipedrive to see pipeline KPIs — open deals, win rate, and sales cycle metrics.
+        </div>
+      ) : null}
+
+      {/* Row 2 — Acquisition KPIs */}
+      <div>
+        <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider px-1 mb-3">Acquisition</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
+          ) : (
+            <>
+              <MetricCard title="Sessions" value={t?.sessions} change={c?.sessions} />
+              <MetricCard title="Conversions (GA4)" value={t?.conversions} change={c?.conversions} />
+              <MetricCard
+                title="Conversion Rate"
+                value={conversionRate}
+                format="percent"
+                subtitle="sessions → conversions"
+              />
+              <MetricCard
+                title="New Leads"
+                value={p?.leads ?? t?.newUsers}
+                subtitle={p ? "from Pipedrive" : "new users (GA4)"}
+              />
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Secondary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
-        ) : (
-          <>
-            <MetricCard title="Engagement Rate" value={t?.engagementRate} format="percent" change={c?.engagementRate} />
-            <MetricCard title="Bounce Rate" value={t?.bounceRate} format="percent" change={c?.bounceRate} invertChange />
-            <MetricCard title="Avg Session Duration" value={t?.avgSessionDuration} format="duration" change={c?.avgSessionDuration} />
-            <MetricCard title="Conversions" value={t?.conversions} change={c?.conversions} />
-          </>
-        )}
-      </div>
-
-      {/* Derived KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {loading ? (
-          Array.from({ length: 3 }).map((_, i) => <MetricCardSkeleton key={i} />)
-        ) : (
-          <>
-            <MetricCard title="Sessions / User" value={sessionsPerUser} format="decimal" subtitle="avg frequency" />
-            <MetricCard title="Pages / Session" value={pagesPerSession} format="decimal" subtitle="avg depth" />
-            <MetricCard title="Conversion Rate" value={conversionRate} format="percent" subtitle="sessions to conversions" />
-          </>
-        )}
-      </div>
-
-      {/* Charts row 1 */}
+      {/* Row 3 — Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {loading ? (
           <>
@@ -142,15 +157,27 @@ export default function DashboardOverview() {
           </>
         ) : (
           <>
-            <ChartCard title="Sessions & Users Over Time">
-              <LineChart
-                data={analytics?.timeSeries ?? []}
-                lines={[
-                  { dataKey: "sessions", name: "Sessions" },
-                  { dataKey: "users", name: "Users" },
-                ]}
-              />
-            </ChartCard>
+            {pipedrive?.timeline?.length > 0 ? (
+              <ChartCard title="Deals Added Over Time">
+                <LineChart
+                  data={pipedrive.timeline}
+                  lines={[
+                    { dataKey: "added", name: "Deals Added" },
+                    { dataKey: "won", name: "Won" },
+                  ]}
+                />
+              </ChartCard>
+            ) : (
+              <ChartCard title="Sessions & Users Over Time">
+                <LineChart
+                  data={analytics?.timeSeries ?? []}
+                  lines={[
+                    { dataKey: "sessions", name: "Sessions" },
+                    { dataKey: "users", name: "Users" },
+                  ]}
+                />
+              </ChartCard>
+            )}
             <ChartCard title="Traffic by Channel">
               <BarChart
                 data={analytics?.channels ?? []}
@@ -162,40 +189,50 @@ export default function DashboardOverview() {
         )}
       </div>
 
-      {/* Charts row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {loading ? (
-          <>
-            <ChartSkeleton />
-            <ChartSkeleton />
-            <ChartSkeleton />
-          </>
-        ) : (
-          <>
-            <ChartCard title="Devices">
-              <DonutChart
-                data={analytics?.devices ?? []}
-                dataKey="sessions"
-                nameKey="device"
-              />
-            </ChartCard>
-            <ChartCard title="New vs Returning">
-              <DonutChart
-                data={analytics?.userTypes ?? []}
-                dataKey="users"
-                nameKey="type"
-              />
-            </ChartCard>
-            <ChartCard title="Top Countries">
-              <BarChart
-                data={(analytics?.countries ?? []).slice(0, 8)}
-                bars={[{ dataKey: "sessions", name: "Sessions" }]}
-                xKey="country"
-              />
-            </ChartCard>
-          </>
-        )}
-      </div>
+      {/* Row 4 — Best Performing Sources */}
+      {!loading && bestSources.length > 0 && (
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Best Performing Sources</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-border bg-blue-sky/40">
+                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Source</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">GA4 Conv.</th>
+                  {pipedrive && (
+                    <>
+                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Deals</th>
+                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Won</th>
+                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Win Rate</th>
+                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Days</th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {bestSources.map((s, i) => (
+                  <tr key={i} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
+                    <td className="px-6 py-3 font-medium text-navy/80">{s.source}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{(s.sessions || 0).toLocaleString()}</td>
+                    <td className="px-6 py-3 text-right text-gray-muted">{s.ga4Conversions ?? "—"}</td>
+                    {pipedrive && (
+                      <>
+                        <td className="px-6 py-3 text-right text-gray-muted">{s.deals || "—"}</td>
+                        <td className="px-6 py-3 text-right text-gray-muted">{s.won || "—"}</td>
+                        <td className="px-6 py-3 text-right text-gray-muted">{s.winRate ? `${s.winRate}%` : "—"}</td>
+                        <td className="px-6 py-3 text-right text-gray-muted">{s.avgDays ?? "—"}</td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* AI Insights */}
       {!loading && analytics && (
@@ -204,75 +241,60 @@ export default function DashboardOverview() {
           endDate={range === "custom" && customRange ? customRange.endDate : getDateRange(range).endDate}
         />
       )}
-
-      {/* Top Pages */}
-      {!loading && analytics?.pages?.length > 0 && (
-        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-          <div className="px-6 py-4 border-b border-border">
-            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Pages</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-border bg-blue-sky/40">
-                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Page</th>
-                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Views</th>
-                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
-                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Avg Duration</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analytics.pages.map((p) => (
-                  <tr key={p.path} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
-                    <td className="px-6 py-3 font-mono text-xs text-navy/80">{p.path}</td>
-                    <td className="px-6 py-3 text-right text-gray-muted">{p.views.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-muted">{p.users.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-muted">{formatDuration(p.avgDuration)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Top Sources */}
-      {!loading && analytics?.sources?.length > 0 && (
-        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-          <div className="px-6 py-4 border-b border-border">
-            <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Top Sources</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-border bg-blue-sky/40">
-                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Source</th>
-                  <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Medium</th>
-                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
-                  <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analytics.sources.slice(0, 10).map((s, i) => (
-                  <tr key={i} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
-                    <td className="px-6 py-3 text-navy/80">{s.source}</td>
-                    <td className="px-6 py-3 text-gray-muted">{s.medium}</td>
-                    <td className="px-6 py-3 text-right text-gray-muted">{s.sessions?.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-right text-gray-muted">{s.users?.toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-function formatDuration(seconds) {
-  if (!seconds) return "0s";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+function buildBestSources(ga4Sources, pipedriveBySource, salesCycle) {
+  if (!ga4Sources?.length) return [];
+
+  const sourceMap = {};
+
+  for (const s of ga4Sources.slice(0, 15)) {
+    const key = s.source?.toLowerCase();
+    if (!key) continue;
+    sourceMap[key] = {
+      source: s.source,
+      sessions: s.sessions || 0,
+      ga4Conversions: s.conversions ?? null,
+      deals: 0,
+      won: 0,
+      winRate: 0,
+      avgDays: null,
+    };
+  }
+
+  if (pipedriveBySource?.length) {
+    for (const ps of pipedriveBySource) {
+      const key = ps.source?.toLowerCase();
+      if (sourceMap[key]) {
+        sourceMap[key].deals = ps.deals;
+        sourceMap[key].won = ps.won;
+        sourceMap[key].winRate = ps.deals > 0 ? Math.round((ps.won / ps.deals) * 100) : 0;
+      } else {
+        sourceMap[key] = {
+          source: ps.source,
+          sessions: 0,
+          ga4Conversions: null,
+          deals: ps.deals,
+          won: ps.won,
+          winRate: ps.deals > 0 ? Math.round((ps.won / ps.deals) * 100) : 0,
+          avgDays: null,
+        };
+      }
+    }
+  }
+
+  if (salesCycle?.length) {
+    for (const sc of salesCycle) {
+      const key = sc.source?.toLowerCase();
+      if (sourceMap[key]) {
+        sourceMap[key].avgDays = sc.avgDays;
+      }
+    }
+  }
+
+  return Object.values(sourceMap)
+    .sort((a, b) => (b.sessions + b.deals * 10) - (a.sessions + a.deals * 10))
+    .slice(0, 10);
 }
