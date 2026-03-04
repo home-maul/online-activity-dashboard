@@ -156,36 +156,63 @@ export default function LinkedInPage() {
             )}
           </div>
 
+          {/* Ad Campaigns — visual cards with banners */}
           {!loading && paid.campaigns?.length > 0 && (
-            <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-              <div className="px-6 py-4 border-b border-border">
-                <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider">Campaigns</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-[13px]">
-                  <thead>
-                    <tr className="border-b border-border bg-blue-sky/40">
-                      <th className="text-left px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Campaign</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Sessions</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Users</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Conversions</th>
-                      <th className="text-right px-6 py-3 text-[11px] font-medium text-gray-muted tracking-wide">Conv. Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paid.campaigns.map((c) => (
-                      <tr key={c.name} className="border-b border-border/50 hover:bg-blue-sky/30 transition-colors duration-150">
-                        <td className="px-6 py-3 font-medium text-navy/80">{c.name}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">{(c.sessions || 0).toLocaleString()}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">{(c.users || 0).toLocaleString()}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">{c.conversions}</td>
-                        <td className="px-6 py-3 text-right text-gray-muted">
-                          {c.sessions > 0 ? ((c.conversions / c.sessions) * 100).toFixed(1) : c.ctr || 0}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="space-y-3">
+              <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider px-1">Ad Campaigns</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {paid.campaigns.map((c) => (
+                  <div key={c.name} className="bg-surface rounded-2xl border border-border overflow-hidden hover:shadow-[0_4px_24px_var(--hover-glow,rgba(43,124,233,0.08))] hover:border-blue/20 transition-all duration-300">
+                    {/* Banner image */}
+                    {c.creative?.imageUrl && (
+                      <div className="relative w-full h-40 bg-blue-sky/40">
+                        <img
+                          src={c.creative.imageUrl}
+                          alt={c.creative.headline || c.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.parentElement.style.display = "none"; }}
+                        />
+                      </div>
+                    )}
+                    <div className="p-5">
+                      {/* Campaign name & headline */}
+                      <h4 className="text-[13px] font-semibold text-navy mb-1 line-clamp-1">{c.name}</h4>
+                      {c.creative?.headline && (
+                        <p className="text-[12px] text-navy/60 mb-1 line-clamp-1">{c.creative.headline}</p>
+                      )}
+                      {c.creative?.description && (
+                        <p className="text-[11px] text-gray-muted mb-3 line-clamp-2">{c.creative.description}</p>
+                      )}
+                      {/* Metrics grid */}
+                      <div className="grid grid-cols-3 gap-3 pt-3 border-t border-border/50">
+                        <div>
+                          <p className="text-[10px] text-gray-muted uppercase tracking-wider">Impressions</p>
+                          <p className="text-[14px] font-semibold text-navy">{(c.impressions || 0).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-muted uppercase tracking-wider">Clicks</p>
+                          <p className="text-[14px] font-semibold text-navy">{(c.clicks || c.sessions || 0).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-muted uppercase tracking-wider">CTR</p>
+                          <p className="text-[14px] font-semibold text-navy">{c.ctr || 0}%</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-muted uppercase tracking-wider">Spend</p>
+                          <p className="text-[14px] font-semibold text-navy">${(c.spend || 0).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-muted uppercase tracking-wider">CPC</p>
+                          <p className="text-[14px] font-semibold text-navy">${c.cpc || 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-muted uppercase tracking-wider">Conversions</p>
+                          <p className="text-[14px] font-semibold text-navy">{c.conversions || 0}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -299,46 +326,56 @@ export default function LinkedInPage() {
           {organicPosts.posts?.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-[11px] font-medium text-gray-muted uppercase tracking-wider px-1">Recent Posts</h3>
-              {organicPosts.posts.map((post) => (
-                <div key={post.id} className="bg-surface rounded-2xl border border-border p-5 hover:shadow-[0_4px_24px_var(--hover-glow,rgba(43,124,233,0.08))] hover:border-blue/20 transition-all duration-300">
-                  <div className="flex gap-4">
-                    {/* Preview thumbnail */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {organicPosts.posts.map((post) => (
+                  <div key={post.id} className="bg-surface rounded-2xl border border-border overflow-hidden hover:shadow-[0_4px_24px_var(--hover-glow,rgba(43,124,233,0.08))] hover:border-blue/20 transition-all duration-300">
+                    {/* Large preview image */}
                     {post.preview?.imageUrl && (
-                      <div className="flex-shrink-0">
+                      <div className="relative w-full h-48 bg-blue-sky/40">
                         <img
                           src={post.preview.imageUrl}
                           alt=""
-                          className="w-20 h-20 rounded-lg object-cover bg-blue-sky/40"
-                          onError={(e) => { e.target.style.display = "none"; }}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.parentElement.style.display = "none"; }}
                         />
                       </div>
                     )}
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-[13px] text-navy/80 leading-relaxed" title={post.text}>
-                          {truncate(post.text, 150)}
-                        </p>
-                        <span className="text-[11px] text-gray-muted whitespace-nowrap flex-shrink-0">{formatDate(post.publishedAt)}</span>
-                      </div>
-                      {/* Article link preview */}
+                    <div className="p-5">
+                      {/* Date */}
+                      <span className="text-[11px] text-gray-muted">{formatDate(post.publishedAt)}</span>
+                      {/* Post text */}
+                      <p className="text-[13px] text-navy/80 leading-relaxed mt-1.5 line-clamp-3" title={post.text}>
+                        {post.text}
+                      </p>
+                      {/* Article link */}
                       {post.preview?.title && post.preview?.url && (
-                        <a href={post.preview.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-1.5 text-[11px] text-blue-mid hover:underline truncate max-w-md">
+                        <a href={post.preview.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-[12px] text-blue-mid hover:underline truncate max-w-full font-medium">
                           {post.preview.title}
                         </a>
                       )}
-                      {/* Metrics row */}
-                      <div className="flex items-center gap-5 mt-3 text-[12px] text-gray-muted">
-                        <span>{post.impressions.toLocaleString()} impressions</span>
-                        <span>{post.reactions.toLocaleString()} reactions</span>
-                        <span>{post.comments.toLocaleString()} comments</span>
-                        <span>{post.shares.toLocaleString()} shares</span>
-                        {post.clicks > 0 && <span>{post.clicks.toLocaleString()} clicks</span>}
+                      {/* Engagement metrics */}
+                      <div className="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-border/50">
+                        <div className="text-center">
+                          <p className="text-[14px] font-semibold text-navy">{post.impressions.toLocaleString()}</p>
+                          <p className="text-[9px] text-gray-muted uppercase tracking-wider">Views</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[14px] font-semibold text-navy">{post.reactions.toLocaleString()}</p>
+                          <p className="text-[9px] text-gray-muted uppercase tracking-wider">Reactions</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[14px] font-semibold text-navy">{post.comments.toLocaleString()}</p>
+                          <p className="text-[9px] text-gray-muted uppercase tracking-wider">Comments</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[14px] font-semibold text-navy">{(post.shares + (post.clicks || 0)).toLocaleString()}</p>
+                          <p className="text-[9px] text-gray-muted uppercase tracking-wider">Shares/Clicks</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>

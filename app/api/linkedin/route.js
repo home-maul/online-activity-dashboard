@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { fetchLinkedInData } from "@/lib/connectors/linkedin";
-import { fetchLinkedInOrganicPosts, fetchLinkedInAds, fetchLinkedInFollowers } from "@/lib/connectors/linkedin-api";
+import { fetchLinkedInOrganicPosts, fetchLinkedInAds, fetchLinkedInAdCreatives, fetchLinkedInFollowers } from "@/lib/connectors/linkedin-api";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
@@ -36,7 +36,25 @@ export async function GET(request) {
     // Native ads (if ad account configured)
     if (adAccountId) {
       try {
-        result.ads = await fetchLinkedInAds(linkedInToken, adAccountId, { startDate, endDate });
+        const [ads, creatives] = await Promise.all([
+          fetchLinkedInAds(linkedInToken, adAccountId, { startDate, endDate }),
+          fetchLinkedInAdCreatives(linkedInToken, adAccountId).catch(() => []),
+        ]);
+
+        // Merge creative data into campaigns
+        if (creatives.length && ads.campaigns?.length) {
+          const creativeMap = {};
+          for (const cr of creatives) {
+            if (!creativeMap[cr.campaignName]) creativeMap[cr.campaignName] = cr;
+          }
+          ads.campaigns = ads.campaigns.map((c) => ({
+            ...c,
+            creative: creativeMap[c.name] || null,
+          }));
+        }
+        ads.creatives = creatives;
+
+        result.ads = ads;
         result.adsSource = "linkedin_api";
       } catch (err) {
         console.warn("[LinkedIn API] Ads failed, falling back to GA4:", err.message);
