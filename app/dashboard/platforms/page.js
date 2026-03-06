@@ -5,12 +5,14 @@ import dynamic from "next/dynamic";
 
 const LinkedInPage = dynamic(() => import("@/app/dashboard/linkedin/page"), { ssr: false });
 const MetaPage = dynamic(() => import("@/app/dashboard/meta/page"), { ssr: false });
+const YouTubePage = dynamic(() => import("@/app/dashboard/youtube/page"), { ssr: false });
 const RedditPage = dynamic(() => import("@/app/dashboard/reddit/page"), { ssr: false });
 const MicrosoftAdsPage = dynamic(() => import("@/app/dashboard/microsoft-ads/page"), { ssr: false });
 
 const TABS = [
   { key: "linkedin", label: "LinkedIn", component: LinkedInPage },
   { key: "meta", label: "Meta", component: MetaPage },
+  { key: "youtube", label: "YouTube", component: YouTubePage },
   { key: "reddit", label: "Reddit", component: RedditPage },
   { key: "microsoft", label: "Microsoft Ads", component: MicrosoftAdsPage },
 ];
